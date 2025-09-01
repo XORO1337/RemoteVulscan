@@ -1,0 +1,231 @@
+# Security Tools Installation Dockerfile
+FROM archlinux:latest as tools-builder
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install basic dependencies and update system
+RUN pacman -Syu --noconfirm && \
+    pacman -S --noconfirm \
+        base-devel \
+        git \
+        curl \
+        wget \
+        sudo \
+        python \
+        python-pip \
+        python-setuptools \
+        ruby \
+        go \
+        golang \
+        rust \
+        cargo \
+        nmap \
+        openssl \
+        sqlite \
+        which \
+        gawk \
+        grep \
+        sed \
+        coreutils \
+        findutils \
+        procps
+
+# Install Python dependencies
+RUN pip install --upgrade pip && \
+    pip install \
+        requests \
+        beautifulsoup4 \
+        lxml \
+        pyyaml \
+        python-whois \
+        cryptography \
+        paramiko \
+        scapy
+
+# Install Go tools
+RUN export GOPATH=/go && \
+    export PATH=$PATH:$GOPATH/bin && \
+    go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest && \
+    go install github.com/OJ/gobuster/v3@latest && \
+    go install github.com/tomnomnom/httprobe@latest && \
+    go install github.com/tomnomnom/ffuf@latest && \
+    go install github.com/OWASP/Amass/v3/...@master && \
+    go install github.com/zmap/zmap@latest
+
+# Install Nmap (if not already installed)
+RUN pacman -S --noconfirm nmap
+
+# Install Nikto
+RUN git clone https://github.com/sullo/nikto.git /opt/nikto && \
+    cd /opt/nikto && \
+    perl -MCPAN -e 'install JSON::PP' && \
+    chmod +x nikto.pl && \
+    ln -s /opt/nikto/nikto.pl /usr/local/bin/nikto
+
+# Install SQLMap
+RUN git clone --depth 1 https://github.com/sqlmapproject/sqlmap.git /opt/sqlmap && \
+    chmod +x /opt/sqlmap/sqlmap.py && \
+    ln -s /opt/sqlmap/sqlmap.py /usr/local/bin/sqlmap
+
+# Install Commix
+RUN git clone --depth 1 https://github.com/commixproject/commix.git /opt/commix && \
+    chmod +x /opt/commix/commix.py && \
+    ln -s /opt/commix/commix.py /usr/local/bin/commix
+
+# Install Corsy
+RUN git clone --depth 1 https://github.com/s0md3v/Corsy.git /opt/corsy && \
+    cd /opt/corsy && \
+    pip install -r requirements.txt && \
+    chmod +x corsy.py && \
+    ln -s /opt/corsy/corsy.py /usr/local/bin/corsy
+
+# Install Nettacker
+RUN git clone --depth 1 https://github.com/OsandaMalith/Nettacker.git /opt/nettacker && \
+    cd /opt/nettacker && \
+    pip install -r requirements.txt && \
+    chmod +x nettacker.py && \
+    ln -s /opt/nettacker/nettacker.py /usr/local/bin/nettacker
+
+# Install Vuls
+RUN pacman -S --noconfirm \
+        go \
+        gcc \
+        git \
+        wget \
+        sqlite && \
+    export GOPATH=/go && \
+    export PATH=$PATH:$GOPATH/bin && \
+    mkdir -p /go/src/github.com/future-architect && \
+    cd /go/src/github.com/future-architect && \
+    git clone https://github.com/future-architect/vuls.git && \
+    cd vuls && \
+    make install
+
+# Install Masscan
+RUN pacman -S --noconfirm masscan
+
+# Install Wfuzz
+RUN pacman -S --noconfirm wfuzz
+
+# Install WhatWeb
+RUN pacman -S --noconfirm whatweb
+
+# Install Dirb
+RUN pacman -S --noconfirm dirb
+
+# Install Dirbuster
+RUN pacman -S --noconfirm dirbuster
+
+# Install Skipfish
+RUN pacman -S --noconfirm skipfish
+
+# Install Wapiti
+RUN pacman -S --noconfirm wapiti
+
+# Install SSL tools
+RUN pacman -S --noconfirm \
+        testssl.sh \
+        sslscan
+
+# Install additional Python security tools
+RUN pip install \
+        dirsearch \
+        subfinder \
+        httpx \
+        waybackurls \
+        gau \
+        gf \
+        subjack \
+        subzy \
+        assetfinder \
+        findomain \
+        amass \
+        aquatone \
+        eyewitness \
+        theHarvester \
+        photon \
+        linkfinder \
+        jsbeautifier \
+        pyjsparser
+
+# Install Ruby tools
+RUN gem install \
+        wpscan \
+        nikto \
+        dirb \
+        wpscan
+
+# Install additional Go tools
+RUN export GOPATH=/go && \
+    export PATH=$PATH:$GOPATH/bin && \
+    go install github.com/ffuf/ffuf@latest && \
+    go install github.com/projectdiscovery/httpx/cmd/httpx@latest && \
+    go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest && \
+    go install github.com/projectdiscovery/naabu/v2/cmd/naabu@latest && \
+    go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest && \
+    go install github.com/tomnomnom/assetfinder@latest && \
+    go install github.com/lc/gau@latest && \
+    go install github.com/tomnomnom/waybackurls@latest && \
+    go install github.com/tomnomnom/hacks@latest && \
+    go install github.com/1ndianl33t/glide@latest && \
+    go install github.com/s0md3v/Arjun@latest && \
+    go install github.com/s0md3v/Smap@latest && \
+    go install github.com/s0md3v/XSStrike@latest && \
+    go install github.com/ethicalhackingplayground/CorsMe@latest && \
+    go install github.com/edoardottt/litarella@latest && \
+    go install github.com/k6x6n/crlfuzz@latest && \
+    go install github.com/dwisiswant0/crlfuzz@latest && \
+    go install github.com/hakluke/hakrawler@latest && \
+    go install github.com/hakluke/hakrevdns@latest && \
+    go install github.com/hakluke/hakoriginfinder@latest && \
+    go install github.com/hakluke/hakcheckurl@latest && \
+    go install github.com/hakluke/haklist@latest && \
+    go install github.com/hakluke/hakip2host@latest && \
+    go install github.com/hakluke/haksubfinder@latest && \
+    go install github.com/hakluke/hakrawler@latest && \
+    go install github.com/hakluke/hakrevdns@latest && \
+    go install github.com/hakluke/hakoriginfinder@latest && \
+    go install github.com/hakluke/hakcheckurl@latest && \
+    go install github.com/hakluke/haklist@latest && \
+    go install github.com/hakluke/hakip2host@latest && \
+    go install github.com/hakluke/haksubfinder@latest
+
+# Update nuclei templates
+RUN nuclei -update-templates
+
+# Create tools directory and copy binaries
+RUN mkdir -p /tools && \
+    cp -r /opt/* /tools/ 2>/dev/null || true && \
+    cp -r /go/bin/* /tools/ 2>/dev/null || true
+
+# Create a script to verify tool installation
+RUN echo '#!/bin/bash' > /tools/verify-tools.sh && \
+    echo 'echo "Verifying security tools installation..."' >> /tools/verify-tools.sh && \
+    echo 'tools=("nmap" "nikto" "sqlmap" "commix" "corsy" "nettacker" "nuclei" "masscan" "testssl.sh" "sslscan")' >> /tools/verify-tools.sh && \
+    echo 'for tool in "${tools[@]}"; do' >> /tools/verify-tools.sh && \
+    echo '    if command -v "$tool" >/dev/null 2>&1; then' >> /tools/verify-tools.sh && \
+    echo '        echo "✓ $tool is installed"' >> /tools/verify-tools.sh && \
+    echo '    else' >> /tools/verify-tools.sh && \
+    echo '        echo "✗ $tool is not installed"' >> /tools/verify-tools.sh && \
+    echo '    fi' >> /tools/verify-tools.sh && \
+    echo 'done' >> /tools/verify-tools.sh && \
+    chmod +x /tools/verify-tools.sh
+
+# Set proper permissions
+RUN chmod -R 755 /tools && \
+    chmod -R +x /tools/*.py 2>/dev/null || true && \
+    chmod -R +x /tools/*.pl 2>/dev/null || true
+
+# Create a simple entrypoint for testing
+RUN echo '#!/bin/bash' > /tools/entrypoint.sh && \
+    echo 'echo "Security Tools Container"' >> /tools/entrypoint.sh && \
+    echo 'echo "Available tools in /tools directory"' >> /tools/entrypoint.sh && \
+    echo 'exec "$@"' >> /tools/entrypoint.sh && \
+    chmod +x /tools/entrypoint.sh
+
+# Set working directory
+WORKDIR /tools
+
+# Default command
+CMD ["/tools/entrypoint.sh", "bash"]
