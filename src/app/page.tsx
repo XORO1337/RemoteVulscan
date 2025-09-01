@@ -10,7 +10,27 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, Shield, Globe, CheckCircle, XCircle, Clock, Eye, FileText } from "lucide-react"
+import { 
+  Loader2, 
+  Shield, 
+  Globe, 
+  CheckCircle, 
+  XCircle, 
+  Clock, 
+  Eye, 
+  FileText,
+  Zap,
+  Terminal,
+  Activity,
+  Cpu,
+  Network,
+  Lock,
+  AlertTriangle,
+  Search,
+  Database,
+  Code,
+  Wifi
+} from "lucide-react"
 import { io, type Socket } from "socket.io-client"
 import ScanResults from "@/components/scan-results"
 import TurnstileWidget from "@/components/turnstile-widget"
@@ -694,48 +714,96 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
+    <div className="min-h-screen bg-background p-4 relative">
+      {/* Cyber Background Effects */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"></div>
+        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"></div>
+        <div className="absolute top-0 left-0 w-px h-full bg-gradient-to-b from-transparent via-cyan-500/50 to-transparent"></div>
+        <div className="absolute top-0 right-0 w-px h-full bg-gradient-to-b from-transparent via-cyan-500/50 to-transparent"></div>
+      </div>
+      
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="text-center space-y-2">
-          <div className="flex items-center justify-center gap-2">
-            <Shield className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold">Vulnerability Scanner</h1>
+        <div className="text-center space-y-4 py-8">
+          <div className="flex items-center justify-center gap-3">
+            <div className="relative">
+              <Shield className="h-12 w-12 text-cyan-400 animate-cyber-glow" />
+              <div className="absolute inset-0 h-12 w-12 text-cyan-400 animate-pulse opacity-50">
+                <Shield className="h-12 w-12" />
+              </div>
+            </div>
+            <h1 className="text-5xl font-bold cyber-text-gradient tracking-tight">
+              CYBER SHIELD
+            </h1>
+            <div className="relative">
+              <Zap className="h-12 w-12 text-purple-400 animate-cyber-glow" />
+              <div className="absolute inset-0 h-12 w-12 text-purple-400 animate-pulse opacity-50">
+                <Zap className="h-12 w-12" />
+              </div>
+            </div>
           </div>
-          <p className="text-muted-foreground">
-            Scan websites for security vulnerabilities using industry-standard tools
+          <p className="text-xl text-cyber-text-secondary max-w-2xl mx-auto">
+            Advanced vulnerability detection system powered by cutting-edge security tools
+          </p>
+          <div className="flex items-center justify-center gap-6 text-sm text-cyber-text-muted">
+            <div className="flex items-center gap-2">
+              <Activity className="h-4 w-4 text-green-400" />
+              <span>Real-time Analysis</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Network className="h-4 w-4 text-blue-400" />
+              <span>Network Scanning</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Lock className="h-4 w-4 text-purple-400" />
+              <span>Security Assessment</span>
+            </div>
           </p>
         </div>
 
         <div className="space-y-6">
           {/* Scanner Tab */}
           <div className="space-y-6">
-            <Card>
+            <Card className="cyber-card border-2 border-cyan-500/20 bg-gradient-to-br from-slate-900/50 to-slate-800/50 backdrop-blur-xl">
               <CardHeader>
-                <CardTitle>Start New Scan</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-2xl flex items-center gap-3">
+                  <Terminal className="h-6 w-6 text-cyan-400" />
+                  <span className="cyber-text-gradient">Initialize Security Scan</span>
+                </CardTitle>
+                <CardDescription className="text-cyber-text-secondary">
                   Enter a website URL and select the type of vulnerability scan to perform
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="url">Website URL</Label>
-                  <div className="flex gap-2">
+                  <Label htmlFor="url" className="text-cyber-text-secondary font-semibold flex items-center gap-2">
+                    <Globe className="h-4 w-4 text-cyan-400" />
+                    Target URL
+                  </Label>
+                  <div className="flex gap-3">
                     <Input
                       id="url"
-                      placeholder="https://example.com"
+                      placeholder="https://target-domain.com"
                       value={url}
                       onChange={(e) => setUrl(e.target.value)}
-                      className="flex-1"
+                      className="flex-1 cyber-input font-mono text-cyan-100 placeholder:text-gray-500"
                     />
-                    <Button onClick={startScan} disabled={isScanning || !url || !captchaToken}>
+                    <Button 
+                      onClick={startScan} 
+                      disabled={isScanning || !url || !captchaToken}
+                      className="cyber-button px-8 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 border-cyan-400 shadow-lg shadow-cyan-500/25"
+                    >
                       {isScanning ? (
                         <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Scanning...
+                          <div className="cyber-spinner mr-3 w-5 h-5"></div>
+                          SCANNING...
                         </>
                       ) : (
-                        "Start Scan"
+                        <>
+                          <Search className="mr-2 h-5 w-5" />
+                          INITIATE SCAN
+                        </>
                       )}
                     </Button>
                   </div>
@@ -744,52 +812,59 @@ export default function Home() {
                 {/* CAPTCHA */}
                 {turnstileSiteKey ? (
                   <div className="space-y-2">
-                    <Label>Verification</Label>
+                    <Label className="text-cyber-text-secondary font-semibold flex items-center gap-2">
+                      <Lock className="h-4 w-4 text-purple-400" />
+                      Security Verification
+                    </Label>
                     <TurnstileWidget
                       siteKey={turnstileSiteKey}
                       onVerify={(token) => setCaptchaToken(token)}
                       onExpire={() => setCaptchaToken(null)}
-                      className="mt-1"
+                      className="mt-1 cyber-border-glow rounded-lg p-2"
                     />
                     {!captchaToken ? (
-                      <p className="text-xs text-muted-foreground">Complete the CAPTCHA to enable scanning.</p>
+                      <p className="text-xs text-cyber-text-muted">Complete security verification to enable scanning.</p>
                     ) : (
-                      <p className="text-xs text-muted-foreground">CAPTCHA verified.</p>
+                      <p className="text-xs text-green-400">✓ Security verification completed.</p>
                     )}
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <Alert>
+                    <Alert className="border-red-500/30 bg-red-500/10">
+                      <AlertTriangle className="h-4 w-4 text-red-400" />
                       <AlertDescription>
-                        CAPTCHA is not configured. Set TURNSTILE_SITE_KEY and TURNSTILE_SECRET_KEY to enable scanning.
+                        Security verification not configured. Contact administrator to enable scanning capabilities.
                       </AlertDescription>
                     </Alert>
                   </div>
                 )}
 
                 <div className="space-y-2">
-                  <Label htmlFor="scanType">Scan Type</Label>
+                  <Label htmlFor="scanType" className="text-cyber-text-secondary font-semibold flex items-center gap-2">
+                    <Cpu className="h-4 w-4 text-purple-400" />
+                    Scan Protocol
+                  </Label>
                   <Select value={scanType} onValueChange={setScanType}>
-                    <SelectTrigger>
+                    <SelectTrigger className="cyber-input">
                       <SelectValue placeholder="Select scan type" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="cyber-card border-cyan-500/30">
                       {/* existing */}
-                      <SelectItem value="FULL_SCAN">Full Comprehensive Scan</SelectItem>
-                      <SelectItem value="NMAP">Network Scan (Nmap)</SelectItem>
-                      <SelectItem value="NIKTO">Web Server Scan (Nikto)</SelectItem>
-                      <SelectItem value="NUCLEI">Vulnerability Scan (Nuclei)</SelectItem>
-                      <SelectItem value="SQLMAP">SQL Injection Scan (SQLMap)</SelectItem>
-                      <SelectItem value="VULS">System Vulnerability Scan (Vuls)</SelectItem>
-                      <SelectItem value="COMMIX">Command Injection Scan (Commix)</SelectItem>
-                      <SelectItem value="NETTACKER">Network Attack Scan (Nettacker)</SelectItem>
-                      <SelectItem value="CORSY">CORS Misconfiguration Scan (Corsy)</SelectItem>
-                      <SelectItem value="SSL_CHECK">SSL/TLS Security Check</SelectItem>
-                      <SelectItem value="HEADER_ANALYSIS">Security Headers Analysis</SelectItem>
+                      <SelectItem value="FULL_SCAN">🔥 FULL SPECTRUM SCAN</SelectItem>
+                      <SelectItem value="NMAP">🌐 NETWORK RECONNAISSANCE</SelectItem>
+                      <SelectItem value="NIKTO">⚡ WEB SERVER ANALYSIS</SelectItem>
+                      <SelectItem value="NUCLEI">🎯 VULNERABILITY DETECTION</SelectItem>
+                      <SelectItem value="SQLMAP">💉 SQL INJECTION PROBE</SelectItem>
+                      <SelectItem value="VULS">🛡️ SYSTEM VULNERABILITY SCAN</SelectItem>
+                      <SelectItem value="COMMIX">⚙️ COMMAND INJECTION TEST</SelectItem>
+                      <SelectItem value="NETTACKER">🔍 NETWORK ATTACK SIMULATION</SelectItem>
+                      <SelectItem value="CORSY">🔗 CORS SECURITY AUDIT</SelectItem>
+                      <SelectItem value="SSL_CHECK">🔐 SSL/TLS CRYPTOGRAPHIC ANALYSIS</SelectItem>
+                      <SelectItem value="HEADER_ANALYSIS">📋 SECURITY HEADERS EVALUATION</SelectItem>
                       {/* new passive tools */}
-                      <SelectItem value="CSP_EVAL">CSP Evaluation</SelectItem>
-                      <SelectItem value="OPEN_REDIRECT_CHECK">Open Redirect Check</SelectItem>
-                      <SelectItem value="EXPOSED_FILES">Exposed Files Check</SelectItem>
+                      <SelectItem value="CSP_EVAL">🛡️ CSP POLICY ANALYSIS</SelectItem>
+                      <SelectItem value="OPEN_REDIRECT_CHECK">🔄 REDIRECT VULNERABILITY SCAN</SelectItem>
+                      <SelectItem value="EXPOSED_FILES">📁 EXPOSED DATA DETECTION</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -797,158 +872,200 @@ export default function Home() {
             </Card>
 
             {/* Scan Types Info */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              <Card>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <Card className="cyber-card hover:border-cyan-400/50 transition-all duration-300 group">
                 <CardHeader>
-                  <CardTitle className="text-lg">Full Scan</CardTitle>
+                  <CardTitle className="text-lg flex items-center gap-2 text-cyan-400 group-hover:text-cyan-300">
+                    <Zap className="h-5 w-5" />
+                    Full Spectrum
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-cyber-text-secondary">
                     Comprehensive security assessment using multiple tools including Nmap, Nuclei, SQLMap, SSL analysis,
                     and more.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="cyber-card hover:border-blue-400/50 transition-all duration-300 group">
                 <CardHeader>
-                  <CardTitle className="text-lg">Network Scan</CardTitle>
+                  <CardTitle className="text-lg flex items-center gap-2 text-blue-400 group-hover:text-blue-300">
+                    <Network className="h-5 w-5" />
+                    Network Recon
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-cyber-text-secondary">
                     Port scanning and service detection using Nmap to identify open ports and running services.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="cyber-card hover:border-purple-400/50 transition-all duration-300 group">
                 <CardHeader>
-                  <CardTitle className="text-lg">Nuclei Scan</CardTitle>
+                  <CardTitle className="text-lg flex items-center gap-2 text-purple-400 group-hover:text-purple-300">
+                    <Search className="h-5 w-5" />
+                    Nuclei Engine
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-cyber-text-secondary">
                     Fast vulnerability scanner using templates to detect known vulnerabilities across various
                     technologies.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="cyber-card hover:border-green-400/50 transition-all duration-300 group">
                 <CardHeader>
-                  <CardTitle className="text-lg">SQLMap Scan</CardTitle>
+                  <CardTitle className="text-lg flex items-center gap-2 text-green-400 group-hover:text-green-300">
+                    <Database className="h-5 w-5" />
+                    SQL Injection
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-cyber-text-secondary">
                     Automated SQL injection detection and exploitation tool to find database vulnerabilities.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="cyber-card hover:border-orange-400/50 transition-all duration-300 group">
                 <CardHeader>
-                  <CardTitle className="text-lg">Vuls Scan</CardTitle>
+                  <CardTitle className="text-lg flex items-center gap-2 text-orange-400 group-hover:text-orange-300">
+                    <Shield className="h-5 w-5" />
+                    System Audit
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-cyber-text-secondary">
                     Linux vulnerability scanner that detects CVE vulnerabilities and provides patch information.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="cyber-card hover:border-red-400/50 transition-all duration-300 group">
                 <CardHeader>
-                  <CardTitle className="text-lg">Commix Scan</CardTitle>
+                  <CardTitle className="text-lg flex items-center gap-2 text-red-400 group-hover:text-red-300">
+                    <Terminal className="h-5 w-5" />
+                    Command Injection
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-cyber-text-secondary">
                     Command injection vulnerability scanner to detect OS command injection flaws.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="cyber-card hover:border-pink-400/50 transition-all duration-300 group">
                 <CardHeader>
-                  <CardTitle className="text-lg">Nettacker Scan</CardTitle>
+                  <CardTitle className="text-lg flex items-center gap-2 text-pink-400 group-hover:text-pink-300">
+                    <Wifi className="h-5 w-5" />
+                    Network Attack
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-cyber-text-secondary">
                     Network penetration testing framework with multiple modules for comprehensive security assessment.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="cyber-card hover:border-yellow-400/50 transition-all duration-300 group">
                 <CardHeader>
-                  <CardTitle className="text-lg">Corsy Scan</CardTitle>
+                  <CardTitle className="text-lg flex items-center gap-2 text-yellow-400 group-hover:text-yellow-300">
+                    <Code className="h-5 w-5" />
+                    CORS Analysis
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-cyber-text-secondary">
                     CORS misconfiguration scanner to detect insecure cross-origin resource sharing policies.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="cyber-card hover:border-indigo-400/50 transition-all duration-300 group">
                 <CardHeader>
-                  <CardTitle className="text-lg">Web Server Scan</CardTitle>
+                  <CardTitle className="text-lg flex items-center gap-2 text-indigo-400 group-hover:text-indigo-300">
+                    <Globe className="h-5 w-5" />
+                    Web Server
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-cyber-text-secondary">
                     Web application vulnerability scanning using Nikto to detect known vulnerabilities.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="cyber-card hover:border-emerald-400/50 transition-all duration-300 group">
                 <CardHeader>
-                  <CardTitle className="text-lg">SSL/TLS Check</CardTitle>
+                  <CardTitle className="text-lg flex items-center gap-2 text-emerald-400 group-hover:text-emerald-300">
+                    <Lock className="h-5 w-5" />
+                    Crypto Analysis
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-cyber-text-secondary">
                     SSL/TLS certificate validation and security configuration analysis.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="cyber-card hover:border-teal-400/50 transition-all duration-300 group">
                 <CardHeader>
-                  <CardTitle className="text-lg">Header Analysis</CardTitle>
+                  <CardTitle className="text-lg flex items-center gap-2 text-teal-400 group-hover:text-teal-300">
+                    <FileText className="h-5 w-5" />
+                    Header Audit
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-cyber-text-secondary">
                     Security headers analysis to detect missing or misconfigured HTTP security headers.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="cyber-card hover:border-violet-400/50 transition-all duration-300 group">
                 <CardHeader>
-                  <CardTitle className="text-lg">CSP Evaluation</CardTitle>
+                  <CardTitle className="text-lg flex items-center gap-2 text-violet-400 group-hover:text-violet-300">
+                    <Shield className="h-5 w-5" />
+                    CSP Evaluation
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-cyber-text-secondary">
                     Evaluate Content Security Policy (CSP) settings for potential security issues.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="cyber-card hover:border-rose-400/50 transition-all duration-300 group">
                 <CardHeader>
-                  <CardTitle className="text-lg">Open Redirect Check</CardTitle>
+                  <CardTitle className="text-lg flex items-center gap-2 text-rose-400 group-hover:text-rose-300">
+                    <AlertTriangle className="h-5 w-5" />
+                    Redirect Scan
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-cyber-text-secondary">
                     Detect open redirect vulnerabilities that could be exploited for phishing attacks.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="cyber-card hover:border-amber-400/50 transition-all duration-300 group">
                 <CardHeader>
-                  <CardTitle className="text-lg">Exposed Files Check</CardTitle>
+                  <CardTitle className="text-lg flex items-center gap-2 text-amber-400 group-hover:text-amber-300">
+                    <FileText className="h-5 w-5" />
+                    Data Exposure
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-cyber-text-secondary">
                     Identify exposed files that could contain sensitive information.
                   </p>
                 </CardContent>
@@ -959,129 +1076,184 @@ export default function Home() {
           {/* Live Results Tab */}
           <div className="space-y-6">
             {currentScan ? (
-              <Card>
+              <Card className="cyber-card border-2 border-cyan-500/30 bg-gradient-to-br from-slate-900/70 to-slate-800/70 backdrop-blur-xl relative overflow-hidden">
+                {/* Scanning Animation Overlay */}
+                {currentScan.status === "RUNNING" && (
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-pulse"></div>
+                )}
+                
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle className="flex items-center gap-2">
-                        <Globe className="h-5 w-5" />
-                        {currentScan.website.url}
+                      <CardTitle className="flex items-center gap-3 text-xl">
+                        <div className="relative">
+                          <Globe className="h-6 w-6 text-cyan-400" />
+                          {currentScan.status === "RUNNING" && (
+                            <div className="absolute inset-0 h-6 w-6 text-cyan-400 animate-ping opacity-75">
+                              <Globe className="h-6 w-6" />
+                            </div>
+                          )}
+                        </div>
+                        <span className="cyber-neon-text font-mono">{currentScan.website.url}</span>
                       </CardTitle>
-                      <CardDescription>
-                        {currentScan.scanType} • {currentScan.status}
+                      <CardDescription className="text-cyber-text-secondary mt-2 flex items-center gap-2">
+                        <Cpu className="h-4 w-4 text-purple-400" />
+                        <span className="font-mono">{currentScan.scanType}</span>
+                        <span className="text-cyber-text-muted">•</span>
+                        <span className={`font-semibold ${
+                          currentScan.status === "RUNNING" ? "text-cyan-400 animate-pulse" :
+                          currentScan.status === "COMPLETED" ? "text-green-400" :
+                          currentScan.status === "FAILED" ? "text-red-400" :
+                          "text-gray-400"
+                        }`}>
+                          {currentScan.status}
+                        </span>
                       </CardDescription>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className={getStatusColor(currentScan.status)}>{currentScan.status}</Badge>
+                    <div className="flex items-center gap-3">
+                      <Badge className={`${getStatusColor(currentScan.status)} font-mono text-xs px-3 py-1 border cyber-border-glow`}>
+                        {getStatusIcon(currentScan.status)}
+                        <span className="ml-2">{currentScan.status}</span>
+                      </Badge>
                       {currentScan.status === "RUNNING" && (
-                        <div className="flex items-center gap-2">
-                          <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
-                          <span className="text-sm text-muted-foreground">Live</span>
+                        <div className="flex items-center gap-2 px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded-full">
+                          <div className="h-2 w-2 bg-cyan-400 rounded-full animate-ping"></div>
+                          <span className="text-xs text-cyan-400 font-mono uppercase tracking-wide">LIVE</span>
                         </div>
                       )}
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-6">
                   {/* Progress Bar */}
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <Label>Scan Progress</Label>
-                      <span className="text-sm text-muted-foreground">{scanOutput?.progress || 0}%</span>
+                      <Label className="text-cyber-text-secondary font-semibold flex items-center gap-2">
+                        <Activity className="h-4 w-4 text-cyan-400" />
+                        Scan Progress
+                      </Label>
+                      <span className="text-sm font-mono text-cyan-400 bg-cyan-500/10 px-2 py-1 rounded border border-cyan-500/30">
+                        {scanOutput?.progress || 0}%
+                      </span>
                     </div>
-                    <Progress value={scanOutput?.progress || 0} className="w-full" />
+                    <div className="cyber-progress h-3 relative">
+                      <div 
+                        className="cyber-progress-fill h-full transition-all duration-500 ease-out"
+                        style={{ width: `${scanOutput?.progress || 0}%` }}
+                      ></div>
+                    </div>
                   </div>
 
                   {/* Terminal-style Output */}
-                  <div className="space-y-2">
-                    <Label>Live Terminal Output</Label>
+                  <div className="space-y-3">
+                    <Label className="text-cyber-text-secondary font-semibold flex items-center gap-2">
+                      <Terminal className="h-4 w-4 text-green-400" />
+                      Live Terminal Output
+                    </Label>
                     <div className="relative">
-                      <div className="absolute top-2 left-2 z-10">
-                        <div className="flex gap-1">
-                          <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                          <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      <div className="cyber-terminal">
+                        <div className="cyber-terminal-header">
+                          <div className="flex gap-2">
+                            <div className="cyber-terminal-dot bg-red-500"></div>
+                            <div className="cyber-terminal-dot bg-yellow-500"></div>
+                            <div className="cyber-terminal-dot bg-green-500"></div>
+                          </div>
+                          <span className="text-xs text-green-400 font-mono ml-4">CYBER-SHIELD-TERMINAL v2.1.0</span>
+                          <div className="ml-auto text-xs text-green-400 font-mono">
+                            {currentScan.status === "RUNNING" && "● ACTIVE"}
+                          </div>
                         </div>
-                      </div>
-                      <ScrollArea className="h-96 w-full rounded-md border border-gray-300 bg-black p-4 font-mono text-sm">
-                        <div className="text-green-400">
+                        <ScrollArea className="cyber-terminal-content">
                           {!scanOutput ? (
-                            <div className="space-y-1">
-                              <div className="animate-pulse">$ Initializing scan...</div>
-                              <div className="animate-pulse">$ Connecting to scan server...</div>
-                              <div className="animate-pulse">$ Preparing scan environment...</div>
+                            <div className="space-y-2">
+                              <div className="animate-pulse text-cyan-400">
+                                <span className="text-green-400">cyber@shield:~$</span> Initializing quantum scan protocols...
+                              </div>
+                              <div className="animate-pulse text-cyan-400">
+                                <span className="text-green-400">cyber@shield:~$</span> Establishing secure connection to scan matrix...
+                              </div>
+                              <div className="animate-pulse text-cyan-400">
+                                <span className="text-green-400">cyber@shield:~$</span> Loading neural network modules...
+                              </div>
                             </div>
                           ) : (
-                            <div className="space-y-1">
-                              <div className="text-cyan-400">
-                                $ vuln-scanner --target {currentScan.website.url} --mode{" "}
+                            <div className="space-y-2">
+                              <div className="text-cyan-400 font-bold">
+                                <span className="text-green-400">cyber@shield:~$</span> cyber-scanner --target {currentScan.website.url} --protocol{" "}
                                 {currentScan.scanType.toLowerCase()}
                               </div>
-                              <div className="text-yellow-400">
-                                [+] Scan initialized at {new Date().toLocaleTimeString()}
+                              <div className="text-yellow-400 font-semibold">
+                                [INIT] Quantum scan matrix initialized at {new Date().toLocaleTimeString()}
                               </div>
-                              <div className="text-blue-400">[+] Target: {currentScan.website.url}</div>
-                              <div className="text-blue-400">[+] Scan Type: {currentScan.scanType}</div>
-                              <div className="text-blue-400">[+] Scan ID: {currentScan.id}</div>
-                              <div className="text-yellow-400">[+] Starting scan...</div>
-                              <div className="whitespace-pre-wrap">{scanOutput.output}</div>
+                              <div className="text-blue-400">[TARGET] {currentScan.website.url}</div>
+                              <div className="text-blue-400">[PROTOCOL] {currentScan.scanType}</div>
+                              <div className="text-blue-400">[SESSION] {currentScan.id}</div>
+                              <div className="text-yellow-400 font-semibold">[EXEC] Deploying security probes...</div>
+                              <div className="whitespace-pre-wrap text-green-400">{scanOutput.output}</div>
                               {currentScan.status === "COMPLETED" && (
-                                <div className="text-green-400 font-bold">
-                                  [✓] Scan completed successfully at {new Date().toLocaleTimeString()}
+                                <div className="text-green-400 font-bold animate-pulse">
+                                  [SUCCESS] ✓ Quantum scan matrix completed at {new Date().toLocaleTimeString()}
                                 </div>
                               )}
                               {currentScan.status === "FAILED" && (
-                                <div className="text-red-400 font-bold">
-                                  [✗] Scan failed: {currentScan.errorMessage}
+                                <div className="text-red-400 font-bold animate-pulse">
+                                  [ERROR] ✗ Scan matrix failure: {currentScan.errorMessage}
                                 </div>
                               )}
                             </div>
                           )}
-                        </div>
-                      </ScrollArea>
+                        </ScrollArea>
+                      </div>
                     </div>
                   </div>
 
                   {/* Quick Stats */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <div className="text-lg font-bold text-blue-600">{scanOutput?.progress || 0}%</div>
-                      <div className="text-xs text-muted-foreground">Progress</div>
+                    <div className="text-center p-4 cyber-card border border-cyan-500/20 hover:border-cyan-400/50 transition-all">
+                      <div className="text-2xl font-bold text-cyan-400 font-mono">{scanOutput?.progress || 0}%</div>
+                      <div className="text-xs text-cyber-text-muted uppercase tracking-wide">Progress</div>
                     </div>
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <div className="text-lg font-bold text-green-600">{currentScan.vulnerabilities.length}</div>
-                      <div className="text-xs text-muted-foreground">Issues Found</div>
+                    <div className="text-center p-4 cyber-card border border-red-500/20 hover:border-red-400/50 transition-all">
+                      <div className="text-2xl font-bold text-red-400 font-mono">{currentScan.vulnerabilities.length}</div>
+                      <div className="text-xs text-cyber-text-muted uppercase tracking-wide">Threats</div>
                     </div>
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <div className="text-lg font-bold text-purple-600">{currentScan.scanType}</div>
-                      <div className="text-xs text-muted-foreground">Scan Type</div>
+                    <div className="text-center p-4 cyber-card border border-purple-500/20 hover:border-purple-400/50 transition-all">
+                      <div className="text-lg font-bold text-purple-400 font-mono text-xs">{currentScan.scanType}</div>
+                      <div className="text-xs text-cyber-text-muted uppercase tracking-wide">Protocol</div>
                     </div>
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <div className="text-lg font-bold text-orange-600">{currentScan.status}</div>
-                      <div className="text-xs text-muted-foreground">Status</div>
+                    <div className="text-center p-4 cyber-card border border-green-500/20 hover:border-green-400/50 transition-all">
+                      <div className={`text-lg font-bold font-mono ${
+                        currentScan.status === "RUNNING" ? "text-cyan-400 animate-pulse" :
+                        currentScan.status === "COMPLETED" ? "text-green-400" :
+                        currentScan.status === "FAILED" ? "text-red-400" :
+                        "text-gray-400"
+                      }`}>
+                        {currentScan.status}
+                      </div>
+                      <div className="text-xs text-cyber-text-muted uppercase tracking-wide">Status</div>
                     </div>
                   </div>
 
                   {/* Detected Vulnerabilities */}
                   {currentScan.vulnerabilities.length > 0 && (
-                    <div className="space-y-2">
-                      <Label>Detected Vulnerabilities</Label>
-                      <div className="space-y-2 max-h-64 overflow-y-auto">
+                    <div className="space-y-3">
+                      <Label className="text-cyber-text-secondary font-semibold flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4 text-red-400" />
+                        Detected Threats
+                      </Label>
+                      <div className="space-y-3 max-h-64 overflow-y-auto">
                         {currentScan.vulnerabilities.map((vuln, index) => (
-                          <div key={index} className="p-4 bg-white rounded-lg shadow-md">
-                            <div className="flex items-center gap-2 mb-1">
-                              <div
-                                className="p-2 rounded-full"
-                                style={{ backgroundColor: getSeverityColor(vuln.severity) }}
-                              >
-                                <span className="text-white font-medium">{vuln.severity}</span>
+                          <div key={index} className="cyber-card border border-red-500/20 hover:border-red-400/50 transition-all p-4">
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide cyber-severity-${vuln.severity.toLowerCase()}`}>
+                                {vuln.severity}
                               </div>
-                              <span className="font-medium">{vuln.title}</span>
+                              <span className="font-semibold text-cyber-text-primary">{vuln.title}</span>
                             </div>
-                            <p className="text-sm">{vuln.description}</p>
+                            <p className="text-sm text-cyber-text-secondary mb-2">{vuln.description}</p>
                             {vuln.solution && (
-                              <p className="text-sm text-muted-foreground mt-1">
-                                <strong>Solution:</strong> {vuln.solution}
+                              <p className="text-sm text-green-400 mt-2 font-mono">
+                                <strong className="text-green-300">SOLUTION:</strong> {vuln.solution}
                               </p>
                             )}
                           </div>
@@ -1093,24 +1265,44 @@ export default function Home() {
                   {/* Action Buttons */}
                   <div className="flex gap-2">
                     {currentScan.status === "COMPLETED" && (
-                      <Button onClick={() => generateHTMLReport(currentScan)}>
+                      <Button 
+                        onClick={() => generateHTMLReport(currentScan)}
+                        className="cyber-button bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 border-green-400"
+                      >
                         <FileText className="h-4 w-4 mr-2" />
-                        Download HTML Report
+                        EXPORT REPORT
                       </Button>
                     )}
-                    <Button variant="outline" onClick={() => setActiveTab("history")}>
-                      View History
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setActiveTab("history")}
+                      className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 hover:border-cyan-400/50"
+                    >
+                      <Clock className="h-4 w-4 mr-2" />
+                      SCAN HISTORY
                     </Button>
                   </div>
                 </CardContent>
               </Card>
             ) : (
-              <Card>
-                <CardContent className="flex items-center justify-center h-64">
+              <Card className="cyber-card border-2 border-dashed border-cyan-500/20">
+                <CardContent className="flex items-center justify-center h-64 relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-purple-500/5 rounded-lg"></div>
                   <div className="text-center space-y-2">
-                    <Shield className="h-12 w-12 text-muted-foreground mx-auto" />
-                    <p className="text-muted-foreground">Start a scan to see live results here</p>
-                    <Button onClick={() => setActiveTab("scanner")}>Go to Scanner</Button>
+                    <div className="relative">
+                      <Shield className="h-16 w-16 text-cyan-400/50 mx-auto animate-pulse" />
+                      <div className="absolute inset-0 h-16 w-16 text-cyan-400/20 mx-auto animate-ping">
+                        <Shield className="h-16 w-16" />
+                      </div>
+                    </div>
+                    <p className="text-cyber-text-muted text-lg">Initialize a security scan to view live analysis</p>
+                    <Button 
+                      onClick={() => setActiveTab("scanner")}
+                      className="cyber-button bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 border-cyan-400"
+                    >
+                      <Terminal className="h-4 w-4 mr-2" />
+                      ACCESS SCANNER
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -1122,49 +1314,64 @@ export default function Home() {
             {selectedScan ? (
               <ScanResults scan={selectedScan} onClose={() => setSelectedScan(null)} />
             ) : (
-              <Card>
+              <Card className="cyber-card border-2 border-cyan-500/20 bg-gradient-to-br from-slate-900/50 to-slate-800/50 backdrop-blur-xl">
                 <CardHeader>
-                  <CardTitle>Scan History</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-2xl flex items-center gap-3">
+                    <Clock className="h-6 w-6 text-cyan-400" />
+                    <span className="cyber-text-gradient">Scan Archive</span>
+                  </CardTitle>
+                  <CardDescription className="text-cyber-text-secondary">
                     View all previous vulnerability scans and their results. Click on any scan to view detailed results.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     {scans.length === 0 ? (
-                      <div className="text-center py-8">
-                        <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <p className="text-muted-foreground">No scans performed yet</p>
+                      <div className="text-center py-12">
+                        <div className="relative">
+                          <Database className="h-16 w-16 text-cyan-400/30 mx-auto mb-4" />
+                          <div className="absolute inset-0 h-16 w-16 text-cyan-400/10 mx-auto animate-ping">
+                            <Database className="h-16 w-16" />
+                          </div>
+                        </div>
+                        <p className="text-cyber-text-muted text-lg">No scan records in archive</p>
+                        <p className="text-cyber-text-muted text-sm mt-2">Execute your first security scan to populate the database</p>
                       </div>
                     ) : (
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         {scans.map((scan) => (
                           <Card
                             key={scan.id}
-                            className="p-4 hover:shadow-md transition-shadow cursor-pointer"
+                            className="cyber-card border border-cyan-500/10 hover:border-cyan-400/30 transition-all cursor-pointer p-4 cyber-hover-glow group"
                             onClick={() => fetchScanDetails(scan.id)}
                           >
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3 flex-1">
+                              <div className="flex items-center gap-4 flex-1">
                                 {getStatusIcon(scan.status)}
                                 <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <p className="font-medium">{scan.website.url}</p>
-                                    <Badge variant="outline" className="text-xs">
+                                  <div className="flex items-center gap-3 mb-2">
+                                    <p className="font-medium text-cyber-text-primary font-mono group-hover:text-cyan-400 transition-colors">
+                                      {scan.website.url}
+                                    </p>
+                                    <Badge variant="outline" className="text-xs border-purple-500/30 text-purple-400 bg-purple-500/10">
                                       {scan.scanType}
                                     </Badge>
                                   </div>
-                                  <p className="text-sm text-muted-foreground">
-                                    {new Date(scan.createdAt).toLocaleString()}
+                                  <p className="text-sm text-cyber-text-muted font-mono">
+                                    EXECUTED: {new Date(scan.createdAt).toLocaleString()}
                                   </p>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2">
-                                <Badge className={getStatusColor(scan.status)}>{scan.status}</Badge>
+                              <div className="flex items-center gap-3">
+                                <Badge className={`${getStatusColor(scan.status)} font-mono text-xs border cyber-border-glow`}>
+                                  {scan.status}
+                                </Badge>
                                 {scan.vulnerabilities.length > 0 && (
-                                  <Badge variant="destructive">{scan.vulnerabilities.length} vulnerabilities</Badge>
+                                  <Badge className="bg-red-500/20 text-red-400 border-red-500/30 font-mono text-xs">
+                                    {scan.vulnerabilities.length} THREATS
+                                  </Badge>
                                 )}
-                                <Button variant="ghost" size="sm">
+                                <Button variant="ghost" size="sm" className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10">
                                   <Eye className="h-4 w-4" />
                                 </Button>
                               </div>
