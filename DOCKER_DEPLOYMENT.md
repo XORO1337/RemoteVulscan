@@ -1,3 +1,75 @@
+# 🐳 RemoteVulscan – Updated Docker Deployment Overview (Concise)
+
+This is a quick-reference section. The original comprehensive guide starts below.
+
+## Quick Start
+```bash
+git clone <repository-url> remotevulscan
+cd remotevulscan
+cp .env.example .env
+docker compose up -d --build
+```
+URL: http://localhost:3000   Health: /api/health
+
+### Enable Realtime Sockets
+```bash
+echo NEXT_PUBLIC_ENABLE_SOCKET=true >> .env
+docker compose up -d app
+```
+
+## Deployment Modes
+| Mode | Command | Pros | Cons |
+| ---- | ------- | ---- | ---- |
+| Multi-service (default) | `docker compose up -d` | Smaller app image; fast rebuild | Two containers (app+tools) |
+| Unified Arch image | `docker compose --profile arch up -d arch` | One container; simpler local ops | Large image; slower build |
+
+Switch by bringing one stack down then starting the other; volumes persist.
+
+## Key Environment Variables
+| Var | Purpose | Default | Note |
+| --- | ------- | ------- | ---- |
+| DATABASE_URL | SQLite path | file:./data/db/custom.db | Persisted in `data/` |
+| NEXT_PUBLIC_ENABLE_SOCKET | Live WebSocket updates | false | Set true for realtime |
+| TURNSTILE_SITE_KEY | Turnstile site key | (empty) | Required for scans |
+| TURNSTILE_SECRET_KEY | Turnstile secret | (empty) | Server verification |
+| TOOLS_PATH | Tools directory | /tools | Mounted read-only in app |
+
+Turnstile always-pass test keys (local ONLY):
+```
+TURNSTILE_SITE_KEY=1x00000000000000000000AA
+TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+```
+
+## Verify Tools
+Multi-service:
+```bash
+docker compose exec tools /tools/verify-tools.sh
+```
+Unified Arch:
+```bash
+docker compose --profile arch exec arch /tools/verify-tools.sh
+```
+
+## Update Workflow
+```bash
+git pull
+docker compose build app && docker compose up -d app
+docker compose build tools && docker compose up -d tools
+```
+Unified Arch:
+```bash
+docker compose --profile arch build arch --no-cache
+docker compose --profile arch up -d --force-recreate arch
+```
+
+## SQLite Backup (Simple)
+```bash
+STAMP=$(date +%Y%m%d_%H%M%S)
+docker compose exec db sqlite3 /data/db/custom.db ".backup /data/db/backup-$STAMP.db"
+```
+
+---
+
 # 🐳 Vulnerability Scanner - Docker Deployment Guide
 
 This guide provides comprehensive instructions for deploying the Vulnerability Scanner application using Docker and Docker Compose on Arch Linux.

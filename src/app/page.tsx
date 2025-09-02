@@ -46,6 +46,7 @@ interface Scan {
   errorMessage?: string
   vulnerabilities: any[]
   createdAt: string
+  results?: string
 }
 
 interface ScanResult {
@@ -53,16 +54,10 @@ interface ScanResult {
   output: string
   progress: number
   status: string
+  vulnerabilities?: any[]
 }
 
-declare global {
-  interface Window {
-    turnstile?: {
-      render: (el: HTMLElement, opts: any) => any
-      reset?: (widgetId: any) => void
-    }
-  }
-}
+// Note: Global window.turnstile type declared in Turnstile widget - avoid re-declaration here
 
 const SOCKET_ENABLED = typeof window !== "undefined"
 
@@ -75,7 +70,8 @@ export default function Home() {
   const [scanOutput, setScanOutput] = useState<ScanResult | null>(null)
   const [socket, setSocket] = useState<Socket | null>(null)
   const [selectedScan, setSelectedScan] = useState<Scan | null>(null)
-  const [activeTab, setActiveTab] = useState("scanner")
+  // UI tab state (scanner | results | history)
+  const [activeTab, setActiveTab] = useState<"scanner" | "results" | "history">("scanner")
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const [turnstileSiteKey, setTurnstileSiteKey] = useState<string>("") // fetched from server
@@ -156,12 +152,12 @@ export default function Home() {
 
         newSocket.on("scanUpdate", (data: ScanResult) => {
           setScanOutput(data)
-          if (data.vulnerabilities && data.vulnerabilities.length > 0) {
+          if (Array.isArray(data.vulnerabilities) && data.vulnerabilities.length > 0) {
             setCurrentScan((prev) => {
               if (!prev) return prev
               return {
                 ...prev,
-                vulnerabilities: data.vulnerabilities,
+                vulnerabilities: data.vulnerabilities || prev.vulnerabilities,
                 status: data.status as any,
               }
             })
@@ -713,7 +709,42 @@ export default function Home() {
     URL.revokeObjectURL(url)
   }
 
+  // Reusable Tab Button (kept lightweight to avoid separate file)
+  function TabButton({
+    tab,
+    label,
+    Icon,
+    disabled = false,
+  }: { tab: "scanner" | "results" | "history"; label: string; Icon?: any; disabled?: boolean }) {
+    const isActive = activeTab === tab
+    return (
+      <Button
+        role="tab"
+        aria-selected={isActive}
+        aria-controls={`panel-${tab}`}
+        tabIndex={isActive ? 0 : -1}
+        disabled={disabled}
+        onClick={() => !disabled && setActiveTab(tab)}
+        onKeyDown={(e) => {
+          if ((e.key === "Enter" || e.key === " ") && !disabled) {
+            e.preventDefault()
+            setActiveTab(tab)
+          }
+        }}
+        className={`px-6 py-3 font-mono font-bold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/70 focus-visible:ring-offset-0 rounded-md relative ${
+          isActive
+            ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-cyan-500/25 shadow-lg"
+            : "bg-transparent text-cyber-text-secondary hover:text-cyan-400 hover:bg-cyan-500/10"
+        } ${disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
+      >
+        {Icon && <Icon className="h-4 w-4 mr-2" />}
+        {label}
+      </Button>
+    )
+  }
+
   return (
+<<<<<<< HEAD
     <div className="min-h-screen bg-background p-4 relative">
       {/* Cyber Background Effects */}
       <div className="fixed inset-0 pointer-events-none">
@@ -759,11 +790,92 @@ export default function Home() {
               <Lock className="h-4 w-4 text-purple-400" />
               <span>Security Assessment</span>
             </div>
+=======
+    <div className="min-h-screen bg-cyber-bg-primary relative overflow-hidden">
+      {/* Enhanced Animated Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="cyber-particle-field"></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-radial from-cyan-500/20 via-cyan-500/10 to-transparent rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-radial from-purple-500/20 via-purple-500/10 to-transparent rounded-full blur-3xl animate-float-delayed"></div>
+        <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-gradient-radial from-blue-500/20 via-blue-500/10 to-transparent rounded-full blur-2xl animate-pulse-slow"></div>
+      </div>
+
+      {/* Professional Header */}
+      <header className="cyber-header relative z-50">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="flex items-center justify-between">
+              <div>
+                <h1 className="cyber-title text-3xl">CYBER SHIELD</h1>
+                <p className="cyber-subtitle text-sm">Advanced Vulnerability Scanner</p>
+              </div>
+            <div className="flex items-center space-x-6">
+              <div className="cyber-status-indicator">
+                <div className="cyber-status-dot"></div>
+                <span className="text-sm font-mono text-green-400">OPERATIONAL</span>
+              </div>
+              <div className="text-sm text-cyber-text-secondary">
+                <span className="font-mono">UPTIME:</span>
+                <span className="ml-2 text-cyan-400 font-mono">99.9%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Cyber Border Effects */}
+      <div className="fixed inset-0 pointer-events-none z-10">
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent animate-scan-horizontal"></div>
+        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent animate-scan-horizontal-reverse"></div>
+        <div className="absolute top-0 left-0 w-px h-full bg-gradient-to-b from-transparent via-cyan-500/50 to-transparent animate-scan-vertical"></div>
+        <div className="absolute top-0 right-0 w-px h-full bg-gradient-to-b from-transparent via-cyan-500/50 to-transparent animate-scan-vertical-reverse"></div>
+      </div>
+      
+      <div className="relative z-20 max-w-7xl mx-auto p-6 space-y-8">
+        {/* Enhanced Hero Section */}
+        <div className="cyber-hero">
+          <h1 className="cyber-hero-title cyber-title">
+            VULNERABILITY SCANNER
+          </h1>
+          <p className="cyber-hero-description">
+            Next-generation cybersecurity platform powered by cutting-edge security tools.
+            Comprehensive vulnerability assessment and real-time threat detection.
+>>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
           </p>
+          <div className="cyber-feature-grid">
+            <div className="cyber-feature-item">
+              <span className="text-sm font-medium">Real-time Analysis</span>
+            </div>
+            <div className="cyber-feature-item">
+              <span className="text-sm font-medium">Network Scanning</span>
+            </div>
+            <div className="cyber-feature-item">
+              <span className="text-sm font-medium">Security Assessment</span>
+            </div>
+          </div>
         </div>
 
-        <div className="space-y-6">
+        {/* Enhanced Tab Navigation */}
+        <div className="relative">
+          <div className="flex items-center justify-center mb-8">
+            <div className="cyber-card-pro p-2 inline-flex gap-1" role="tablist" aria-label="Scanner navigation tabs">
+              <TabButton tab="scanner" label="SCANNER" Icon={Terminal} />
+              <TabButton
+                tab="results"
+                label="LIVE RESULTS"
+                Icon={Activity}
+                disabled={!currentScan}
+              />
+              <TabButton tab="history" label="HISTORY" Icon={Clock} />
+            </div>
+            {!currentScan && activeTab === "results" && (
+              <p className="text-center text-xs mt-2 text-cyber-text-muted font-mono">No active scan. Start one in the Scanner tab.</p>
+            )}
+          </div>
+        </div>
+
+        <div className="space-y-8">
           {/* Scanner Tab */}
+<<<<<<< HEAD
           <div className="space-y-6">
             <Card className="cyber-card border-2 border-cyan-500/20 bg-gradient-to-br from-slate-900/50 to-slate-800/50 backdrop-blur-xl">
               <CardHeader>
@@ -780,6 +892,25 @@ export default function Home() {
                   <Label htmlFor="url" className="text-cyber-text-secondary font-semibold flex items-center gap-2">
                     <Globe className="h-4 w-4 text-cyan-400" />
                     Target URL
+=======
+          {activeTab === "scanner" && (
+          <div className="space-y-8">
+            <Card className="cyber-card-pro">
+              <CardHeader className="pb-6">
+                <div className="flex items-center gap-3 mb-2">
+                  <Terminal className="h-6 w-6 text-cyan-400" />
+                  <CardTitle className="text-2xl cyber-text-gradient">INITIATE SECURITY SCAN</CardTitle>
+                </div>
+                <CardDescription className="text-lg text-cyber-text-secondary">
+                  Deploy advanced vulnerability assessment protocols against target infrastructure
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-3">
+                  <Label htmlFor="url" className="text-cyber-text-secondary font-semibold flex items-center gap-2">
+                    <Globe className="h-4 w-4 text-cyan-400" />
+                    TARGET URL
+>>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
                   </Label>
                   <div className="flex gap-3">
                     <Input
@@ -787,21 +918,37 @@ export default function Home() {
                       placeholder="https://target-domain.com"
                       value={url}
                       onChange={(e) => setUrl(e.target.value)}
+<<<<<<< HEAD
                       className="flex-1 cyber-input font-mono text-cyan-100 placeholder:text-gray-500"
+=======
+                      className="cyber-input flex-1 font-mono"
+>>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
                     />
                     <Button 
                       onClick={startScan} 
                       disabled={isScanning || !url || !captchaToken}
+<<<<<<< HEAD
                       className="cyber-button px-8 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 border-cyan-400 shadow-lg shadow-cyan-500/25"
                     >
                       {isScanning ? (
                         <>
                           <div className="cyber-spinner mr-3 w-5 h-5"></div>
+=======
+                      className="cyber-button bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 border-cyan-400 px-8"
+                    >
+                      {isScanning ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+>>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
                           SCANNING...
                         </>
                       ) : (
                         <>
+<<<<<<< HEAD
                           <Search className="mr-2 h-5 w-5" />
+=======
+                          <Search className="mr-2 h-4 w-4" />
+>>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
                           INITIATE SCAN
                         </>
                       )}
@@ -809,17 +956,25 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* CAPTCHA */}
+                {/* Security Verification */}
                 {turnstileSiteKey ? (
+<<<<<<< HEAD
                   <div className="space-y-2">
                     <Label className="text-cyber-text-secondary font-semibold flex items-center gap-2">
                       <Lock className="h-4 w-4 text-purple-400" />
                       Security Verification
+=======
+                  <div className="space-y-3">
+                    <Label className="text-cyber-text-secondary font-semibold flex items-center gap-2">
+                      <Lock className="h-4 w-4 text-purple-400" />
+                      SECURITY VERIFICATION
+>>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
                     </Label>
                     <TurnstileWidget
                       siteKey={turnstileSiteKey}
                       onVerify={(token) => setCaptchaToken(token)}
                       onExpire={() => setCaptchaToken(null)}
+<<<<<<< HEAD
                       className="mt-1 cyber-border-glow rounded-lg p-2"
                     />
                     {!captchaToken ? (
@@ -834,11 +989,28 @@ export default function Home() {
                       <AlertTriangle className="h-4 w-4 text-red-400" />
                       <AlertDescription>
                         Security verification not configured. Contact administrator to enable scanning capabilities.
+=======
+                      className="cyber-border-glow rounded-lg p-3"
+                    />
+                    {!captchaToken ? (
+                      <p className="text-xs text-cyber-text-muted font-mono">► Complete security verification to enable scanning protocols</p>
+                    ) : (
+                      <p className="text-xs text-green-400 font-mono animate-pulse">✓ SECURITY VERIFICATION AUTHENTICATED</p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <Alert className="border-red-500/30 bg-red-500/10 cyber-card">
+                      <AlertTriangle className="h-4 w-4 text-red-400" />
+                      <AlertDescription className="text-red-400 font-mono">
+                        SECURITY VERIFICATION MODULE OFFLINE - Contact system administrator
+>>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
                       </AlertDescription>
                     </Alert>
                   </div>
                 )}
 
+<<<<<<< HEAD
                 <div className="space-y-2">
                   <Label htmlFor="scanType" className="text-cyber-text-secondary font-semibold flex items-center gap-2">
                     <Cpu className="h-4 w-4 text-purple-400" />
@@ -865,12 +1037,39 @@ export default function Home() {
                       <SelectItem value="CSP_EVAL">🛡️ CSP POLICY ANALYSIS</SelectItem>
                       <SelectItem value="OPEN_REDIRECT_CHECK">🔄 REDIRECT VULNERABILITY SCAN</SelectItem>
                       <SelectItem value="EXPOSED_FILES">📁 EXPOSED DATA DETECTION</SelectItem>
+=======
+                <div className="space-y-3">
+                  <Label htmlFor="scanType" className="text-cyber-text-secondary font-semibold flex items-center gap-2">
+                    <Cpu className="h-4 w-4 text-purple-400" />
+                    SCAN PROTOCOL
+                  </Label>
+                  <Select value={scanType} onValueChange={setScanType}>
+                    <SelectTrigger className="cyber-input h-14 text-left">
+                      <SelectValue placeholder="▶ SELECT ATTACK VECTOR" />
+                    </SelectTrigger>
+                    <SelectContent className="cyber-card border-cyan-500/30 bg-cyber-surface/95 backdrop-blur-xl">
+                      <SelectItem value="FULL_SCAN" className="cyber-select-item">🔥 FULL SPECTRUM SCAN</SelectItem>
+                      <SelectItem value="NMAP" className="cyber-select-item">🌐 NETWORK RECONNAISSANCE</SelectItem>
+                      <SelectItem value="NIKTO" className="cyber-select-item">⚡ WEB SERVER ANALYSIS</SelectItem>
+                      <SelectItem value="NUCLEI" className="cyber-select-item">🎯 VULNERABILITY DETECTION</SelectItem>
+                      <SelectItem value="SQLMAP" className="cyber-select-item">💉 SQL INJECTION PROBE</SelectItem>
+                      <SelectItem value="VULS" className="cyber-select-item">🛡️ SYSTEM VULNERABILITY SCAN</SelectItem>
+                      <SelectItem value="COMMIX" className="cyber-select-item">⚙️ COMMAND INJECTION TEST</SelectItem>
+                      <SelectItem value="NETTACKER" className="cyber-select-item">🔍 NETWORK ATTACK SIMULATION</SelectItem>
+                      <SelectItem value="CORSY" className="cyber-select-item">🔗 CORS SECURITY AUDIT</SelectItem>
+                      <SelectItem value="SSL_CHECK" className="cyber-select-item">🔐 SSL/TLS CRYPTOGRAPHIC ANALYSIS</SelectItem>
+                      <SelectItem value="HEADER_ANALYSIS" className="cyber-select-item">📋 SECURITY HEADERS EVALUATION</SelectItem>
+                      <SelectItem value="CSP_EVAL" className="cyber-select-item">🛡️ CSP POLICY ANALYSIS</SelectItem>
+                      <SelectItem value="OPEN_REDIRECT_CHECK" className="cyber-select-item">🔄 REDIRECT VULNERABILITY SCAN</SelectItem>
+                      <SelectItem value="EXPOSED_FILES" className="cyber-select-item">📁 EXPOSED DATA DETECTION</SelectItem>
+>>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
                     </SelectContent>
                   </Select>
                 </div>
               </CardContent>
             </Card>
 
+<<<<<<< HEAD
             {/* Scan Types Info */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               <Card className="cyber-card hover:border-cyan-400/50 transition-all duration-300 group">
@@ -884,12 +1083,28 @@ export default function Home() {
                   <p className="text-sm text-cyber-text-secondary">
                     Comprehensive security assessment using multiple tools including Nmap, Nuclei, SQLMap, SSL analysis,
                     and more.
+=======
+            {/* Enhanced Attack Vector Info Grid */}
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <Card className="cyber-card hover:border-cyan-400/50 transition-all duration-300 group">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-3 text-cyan-400 group-hover:text-cyan-300">
+                    <Zap className="h-6 w-6" />
+                    FULL SPECTRUM
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-cyber-text-secondary leading-relaxed">
+                    Complete multi-vector assault simulation deploying advanced reconnaissance, vulnerability detection, 
+                    and exploitation frameworks in coordinated sequence.
+>>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
                   </p>
                 </CardContent>
               </Card>
 
               <Card className="cyber-card hover:border-blue-400/50 transition-all duration-300 group">
                 <CardHeader>
+<<<<<<< HEAD
                   <CardTitle className="text-lg flex items-center gap-2 text-blue-400 group-hover:text-blue-300">
                     <Network className="h-5 w-5" />
                     Network Recon
@@ -898,12 +1113,24 @@ export default function Home() {
                 <CardContent>
                   <p className="text-sm text-cyber-text-secondary">
                     Port scanning and service detection using Nmap to identify open ports and running services.
+=======
+                  <CardTitle className="text-lg flex items-center gap-3 text-blue-400 group-hover:text-blue-300">
+                    <Network className="h-6 w-6" />
+                    NETWORK RECON
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-cyber-text-secondary leading-relaxed">
+                    Deep packet analysis and service fingerprinting using advanced port scanning algorithms 
+                    to map network topology and identify attack surfaces.
+>>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
                   </p>
                 </CardContent>
               </Card>
 
               <Card className="cyber-card hover:border-purple-400/50 transition-all duration-300 group">
                 <CardHeader>
+<<<<<<< HEAD
                   <CardTitle className="text-lg flex items-center gap-2 text-purple-400 group-hover:text-purple-300">
                     <Search className="h-5 w-5" />
                     Nuclei Engine
@@ -913,10 +1140,22 @@ export default function Home() {
                   <p className="text-sm text-cyber-text-secondary">
                     Fast vulnerability scanner using templates to detect known vulnerabilities across various
                     technologies.
+=======
+                  <CardTitle className="text-lg flex items-center gap-3 text-purple-400 group-hover:text-purple-300">
+                    <Code className="h-6 w-6" />
+                    NUCLEI ENGINE
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-cyber-text-secondary leading-relaxed">
+                    High-velocity template-based vulnerability scanner utilizing community-driven threat intelligence 
+                    for rapid zero-day detection.
+>>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
                   </p>
                 </CardContent>
               </Card>
 
+<<<<<<< HEAD
               <Card className="cyber-card hover:border-green-400/50 transition-all duration-300 group">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2 text-green-400 group-hover:text-green-300">
@@ -927,10 +1166,24 @@ export default function Home() {
                 <CardContent>
                   <p className="text-sm text-cyber-text-secondary">
                     Automated SQL injection detection and exploitation tool to find database vulnerabilities.
+=======
+              <Card className="cyber-card hover:border-red-400/50 transition-all duration-300 group">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-3 text-red-400 group-hover:text-red-300">
+                    <Database className="h-6 w-6" />
+                    SQL INJECTION
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-cyber-text-secondary leading-relaxed">
+                    Automated database exploitation framework with advanced blind injection techniques 
+                    and payload optimization algorithms.
+>>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
                   </p>
                 </CardContent>
               </Card>
 
+<<<<<<< HEAD
               <Card className="cyber-card hover:border-orange-400/50 transition-all duration-300 group">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2 text-orange-400 group-hover:text-orange-300">
@@ -941,10 +1194,24 @@ export default function Home() {
                 <CardContent>
                   <p className="text-sm text-cyber-text-secondary">
                     Linux vulnerability scanner that detects CVE vulnerabilities and provides patch information.
+=======
+              <Card className="cyber-card hover:border-green-400/50 transition-all duration-300 group">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-3 text-green-400 group-hover:text-green-300">
+                    <Lock className="h-6 w-6" />
+                    SYSTEM AUDIT
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-cyber-text-secondary leading-relaxed">
+                    Comprehensive CVE database correlation with real-time patch status analysis 
+                    for enterprise vulnerability management.
+>>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
                   </p>
                 </CardContent>
               </Card>
 
+<<<<<<< HEAD
               <Card className="cyber-card hover:border-red-400/50 transition-all duration-300 group">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2 text-red-400 group-hover:text-red-300">
@@ -955,12 +1222,26 @@ export default function Home() {
                 <CardContent>
                   <p className="text-sm text-cyber-text-secondary">
                     Command injection vulnerability scanner to detect OS command injection flaws.
+=======
+              <Card className="cyber-card hover:border-orange-400/50 transition-all duration-300 group">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-3 text-orange-400 group-hover:text-orange-300">
+                    <Terminal className="h-6 w-6" />
+                    CMD INJECTION
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-cyber-text-secondary leading-relaxed">
+                    Advanced command injection detection engine with blind execution analysis 
+                    and system compromise verification protocols.
+>>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
                   </p>
                 </CardContent>
               </Card>
 
               <Card className="cyber-card hover:border-pink-400/50 transition-all duration-300 group">
                 <CardHeader>
+<<<<<<< HEAD
                   <CardTitle className="text-lg flex items-center gap-2 text-pink-400 group-hover:text-pink-300">
                     <Wifi className="h-5 w-5" />
                     Network Attack
@@ -969,10 +1250,22 @@ export default function Home() {
                 <CardContent>
                   <p className="text-sm text-cyber-text-secondary">
                     Network penetration testing framework with multiple modules for comprehensive security assessment.
+=======
+                  <CardTitle className="text-lg flex items-center gap-3 text-pink-400 group-hover:text-pink-300">
+                    <Wifi className="h-6 w-6" />
+                    ATTACK SIM
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-cyber-text-secondary leading-relaxed">
+                    Multi-vector penetration testing framework with automated exploitation chains 
+                    and lateral movement simulation capabilities.
+>>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
                   </p>
                 </CardContent>
               </Card>
 
+<<<<<<< HEAD
               <Card className="cyber-card hover:border-yellow-400/50 transition-all duration-300 group">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2 text-yellow-400 group-hover:text-yellow-300">
@@ -1067,13 +1360,29 @@ export default function Home() {
                 <CardContent>
                   <p className="text-sm text-cyber-text-secondary">
                     Identify exposed files that could contain sensitive information.
+=======
+              <Card className="cyber-card hover:border-indigo-400/50 transition-all duration-300 group">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-3 text-indigo-400 group-hover:text-indigo-300">
+                    <Globe className="h-6 w-6" />
+                    CORS AUDIT
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-cyber-text-secondary leading-relaxed">
+                    Cross-origin resource sharing policy analyzer with bypass technique validation 
+                    and domain trust verification systems.
+>>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
                   </p>
                 </CardContent>
               </Card>
             </div>
+
           </div>
+          )}
 
           {/* Live Results Tab */}
+          {activeTab === "results" && (
           <div className="space-y-6">
             {currentScan ? (
               <Card className="cyber-card border-2 border-cyan-500/30 bg-gradient-to-br from-slate-900/70 to-slate-800/70 backdrop-blur-xl relative overflow-hidden">
@@ -1285,6 +1594,7 @@ export default function Home() {
                 </CardContent>
               </Card>
             ) : (
+<<<<<<< HEAD
               <Card className="cyber-card border-2 border-dashed border-cyan-500/20">
                 <CardContent className="flex items-center justify-center h-64 relative">
                   <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-purple-500/5 rounded-lg"></div>
@@ -1302,14 +1612,40 @@ export default function Home() {
                     >
                       <Terminal className="h-4 w-4 mr-2" />
                       ACCESS SCANNER
+=======
+              <Card className="cyber-card-pro border-2 border-dashed border-cyan-500/20">
+                <CardContent className="flex items-center justify-center h-80 relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-purple-500/5 rounded-lg"></div>
+                  <div className="text-center space-y-6 relative z-10">
+                    <div className="relative">
+                      <Shield className="h-20 w-20 text-cyan-400/50 mx-auto animate-pulse" />
+                      <div className="absolute inset-0 h-20 w-20 text-cyan-400/20 mx-auto animate-ping">
+                        <Shield className="h-20 w-20" />
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <p className="text-cyber-text-primary text-xl font-mono font-bold">AWAITING SCAN INITIATION</p>
+                      <p className="text-cyber-text-muted text-sm font-mono">
+                        No active security scan detected. Initialize vulnerability assessment protocols.
+                      </p>
+                    </div>
+                    <Button 
+                      onClick={() => setActiveTab("scanner")}
+                      className="cyber-button bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 border-cyan-400 px-8 py-4 text-lg"
+                    >
+                      <Terminal className="h-5 w-5 mr-3" />
+                      ACCESS SCANNER INTERFACE
+>>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
                     </Button>
                   </div>
                 </CardContent>
               </Card>
             )}
           </div>
+          )}
 
           {/* History Tab */}
+          {activeTab === "history" && (
           <div className="space-y-6">
             {selectedScan ? (
               <ScanResults scan={selectedScan} onClose={() => setSelectedScan(null)} />
@@ -1385,6 +1721,7 @@ export default function Home() {
               </Card>
             )}
           </div>
+          )}
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+package-lock.json
 
 # next.js
 /.next/
@@ -26,3 +27,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .env
+<<<<<<< HEAD
+=======
+
+# IDE
+.vscode/
+.idea/
+>>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)

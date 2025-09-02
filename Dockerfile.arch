@@ -1,0 +1,89 @@
+# syntax=docker/dockerfile:1
+# -----------------------------------------------------------------------------
+# RemoteVulscan (Arch Linux + Security Tools)
+# One-container image that ships the Next.js app AND the security tooling.
+# Intended for development / self‑host on Arch-compatible environments.
+# NOTE: Heavy image (many tools). For production minimal runtime, prefer the
+# existing multi-stage Alpine Dockerfile plus a separate tools service.
+# -----------------------------------------------------------------------------
+
+FROM archlinux:latest AS base
+
+ENV NODE_ENV=production \
+    NEXT_TELEMETRY_DISABLED=1 \
+    PNPM_VERSION=8.15.4 \
+    TOOLS_PATH=/tools \
+    PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/go/bin:${TOOLS_PATH}:${PATH}"
+
+WORKDIR /app
+
+# Base system + core dependencies (grouped to keep layers small)
+RUN pacman -Syu --noconfirm && \
+    pacman -S --noconfirm --needed \
+      git curl wget ca-certificates bash coreutils findutils grep sed gawk which \
+      python python-pip python-setuptools \
+      nodejs npm \
+      go gcc make perl ruby openssl sqlite sudo \
+      nmap masscan wfuzz whatweb dirb dirbuster skipfish wapiti testssl.sh sslscan \
+      procps-ng && \
+    update-ca-trust && \
+    npm install -g corepack && corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate && \
+    mkdir -p ${TOOLS_PATH}
+
+# -----------------------------------------------------------------------------
+# Dependencies stage (cache pnpm install)
+# -----------------------------------------------------------------------------
+FROM base AS deps
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+
+# -----------------------------------------------------------------------------
+# Build stage
+# -----------------------------------------------------------------------------
+FROM base AS builder
+ENV NODE_ENV=production
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN pnpm build
+
+# -----------------------------------------------------------------------------
+# Tools stage - install security tooling (can be cached separately)
+# -----------------------------------------------------------------------------
+FROM base AS tools
+COPY scripts/install-tools.sh /tmp/install-tools.sh
+RUN chmod +x /tmp/install-tools.sh && \
+    /tmp/install-tools.sh && \
+    /tools/verify-tools.sh || true
+
+# -----------------------------------------------------------------------------
+# Final runtime image with app + tools
+# -----------------------------------------------------------------------------
+FROM base AS app
+# Non-root user
+RUN useradd -m -u 1001 appuser && chown -R appuser:appuser /app && chown -R appuser:appuser ${TOOLS_PATH}
+USER appuser
+
+# Copy node modules + build artifacts + tools
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/package.json ./package.json
+COPY --from=tools /tools ${TOOLS_PATH}
+
+# Healthcheck endpoint
+EXPOSE 3000
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:3000/api/health || exit 1
+
+# Environment placeholders (override at run time)
+ENV NEXT_PUBLIC_ENABLE_SOCKET=false \
+    TURNSTILE_SITE_KEY="" \
+    TURNSTILE_SECRET_KEY=""
+
+# Start command
+ENTRYPOINT ["/usr/bin/env"]
+CMD ["pnpm", "start"]
+
+# Usage examples (build & run):
+# docker build -f Dockerfile.arch -t remotevulscan:arch .
+# docker run --rm -p 3000:3000 --name remotevulscan remotevulscan:arch

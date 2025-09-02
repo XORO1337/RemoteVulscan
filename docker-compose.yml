@@ -118,6 +118,32 @@ services:
     profiles:
       - logging
 
+  # OPTIONAL: Unified Arch-based image containing both app + tools
+  # Enable with: docker compose build arch && docker compose run --service-ports arch
+  arch:
+    build:
+      context: .
+      dockerfile: Dockerfile.arch
+      target: app
+    container_name: vuln-scanner-arch
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_ENABLE_SOCKET=${NEXT_PUBLIC_ENABLE_SOCKET:-false}
+      - TURNSTILE_SITE_KEY=${TURNSTILE_SITE_KEY:-}
+      - TURNSTILE_SECRET_KEY=${TURNSTILE_SECRET_KEY:-}
+      - TOOLS_PATH=/tools
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./reports:/app/reports
+    networks:
+      - vuln-scanner-network
+    restart: unless-stopped
+    profiles:
+      - arch
+
 volumes:
   redis_data:
     driver: local

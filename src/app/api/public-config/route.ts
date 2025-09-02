@@ -8,6 +8,14 @@ export function GET() {
 
   const captchaConfigured = Boolean(siteKey)
 
+  // Log for debugging (remove in production)
+  console.log('Public config requested:', {
+    hasSiteKey: !!siteKey,
+    siteKeyPrefix: siteKey ? siteKey.substring(0, 10) + '...' : 'none',
+    enableSocket,
+    captchaConfigured
+  })
+
   return NextResponse.json({
     turnstileSiteKey: siteKey,
     enableSocket,
