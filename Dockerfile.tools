@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install basic dependencies and update system
 RUN pacman -Syu --noconfirm && \
-    pacman -S --noconfirm \
+    pacman -S --noconfirm --needed \
         base-devel \
         git \
         curl \
@@ -17,9 +17,7 @@ RUN pacman -Syu --noconfirm && \
         python-setuptools \
         ruby \
         go \
-        golang \
         rust \
-        cargo \
         nmap \
         openssl \
         sqlite \
@@ -29,7 +27,7 @@ RUN pacman -Syu --noconfirm && \
         sed \
         coreutils \
         findutils \
-        procps
+        procps-ng
 
 # Install Python dependencies
 RUN pip install --upgrade pip && \
