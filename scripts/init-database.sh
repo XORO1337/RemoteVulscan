@@ -1,6 +1,7 @@
 #!/bin/bash
 
 echo "🗄️  Database Initialization Script"
+echo "Made with ❤️ by Hardik (@XORO1337) "
 echo "=================================="
 
 # Check if we're in the right directory
