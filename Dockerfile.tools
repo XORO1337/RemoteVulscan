@@ -54,53 +54,7 @@ RUN export GOPATH=/go && \
     go install github.com/zmap/zmap@latest
 
 # Install Nmap (if not already installed)
-RUN pacman -S --noconfirm nmap
-
-# Install Nikto
-RUN git clone https://github.com/sullo/nikto.git /opt/nikto && \
-    cd /opt/nikto && \
-    perl -MCPAN -e 'install JSON::PP' && \
-    chmod +x nikto.pl && \
-    ln -s /opt/nikto/nikto.pl /usr/local/bin/nikto
-
-# Install SQLMap
-RUN git clone --depth 1 https://github.com/sqlmapproject/sqlmap.git /opt/sqlmap && \
-    chmod +x /opt/sqlmap/sqlmap.py && \
-    ln -s /opt/sqlmap/sqlmap.py /usr/local/bin/sqlmap
-
-# Install Commix
-RUN git clone --depth 1 https://github.com/commixproject/commix.git /opt/commix && \
-    chmod +x /opt/commix/commix.py && \
-    ln -s /opt/commix/commix.py /usr/local/bin/commix
-
-# Install Corsy
-RUN git clone --depth 1 https://github.com/s0md3v/Corsy.git /opt/corsy && \
-    cd /opt/corsy && \
-    pip install -r requirements.txt && \
-    chmod +x corsy.py && \
-    ln -s /opt/corsy/corsy.py /usr/local/bin/corsy
-
-# Install Nettacker
-RUN git clone --depth 1 https://github.com/OsandaMalith/Nettacker.git /opt/nettacker && \
-    cd /opt/nettacker && \
-    pip install -r requirements.txt && \
-    chmod +x nettacker.py && \
-    ln -s /opt/nettacker/nettacker.py /usr/local/bin/nettacker
-
-# Install Vuls
-RUN pacman -S --noconfirm \
-        go \
-        gcc \
-        git \
-        wget \
-        sqlite && \
-    export GOPATH=/go && \
-    export PATH=$PATH:$GOPATH/bin && \
-    mkdir -p /go/src/github.com/future-architect && \
-    cd /go/src/github.com/future-architect && \
-    git clone https://github.com/future-architect/vuls.git && \
-    cd vuls && \
-    make install
+RUN pacman -S --noconfirm nmap nikto sqlmap commix corsy nettacker vuls
 
 # Install Masscan
 RUN pacman -S --noconfirm masscan

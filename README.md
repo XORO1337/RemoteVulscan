@@ -2,6 +2,15 @@
 
 A comprehensive, beginner-friendly guide to deploy RemoteVulscan vulnerability scanner with Docker. This guide covers everything from system setup to production deployment.
 
+## 🚀 **Quick Platform Selection**
+
+| Platform | Guide | Best For |
+|----------|-------|----------|
+| 🐧 **Linux/macOS** | 👇 **This Guide** | Development, Production servers |
+| 🪟 **Windows** | 📖 **[Windows Deployment Guide](WINDOWS_DEPLOYMENT.md)** | Windows 10/11, Windows Server |
+
+> **Windows Users:** Click the link above for Windows-specific instructions including Docker Desktop, WSL2, and PowerShell scripts.
+
 ---
 
 ## 📋 Table of Contents
