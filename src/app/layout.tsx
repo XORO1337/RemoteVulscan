@@ -1,9 +1,5 @@
 import type { Metadata } from "next";
-<<<<<<< HEAD
-import { Geist, Geist_Mono } from "next/font/google";
-=======
 import { GeistSans, GeistMono } from "geist/font";
->>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
 import "@fontsource/jetbrains-mono/400.css";
 import "@fontsource/jetbrains-mono/600.css";
 import "@fontsource/jetbrains-mono/700.css";

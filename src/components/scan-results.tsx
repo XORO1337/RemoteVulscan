@@ -790,10 +790,6 @@ export default function ScanResults({ scan, onClose }: ScanResultsProps) {
                     </pre>
                   </ScrollArea>
                 </div>
-<<<<<<< HEAD
-                </ScrollArea>
-=======
->>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
               ) : (
                 <div className="text-center py-12 cyber-card border border-gray-500/10">
                   <div className="relative">

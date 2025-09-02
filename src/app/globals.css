@@ -1,10 +1,6 @@
 @import "tailwindcss";
 
-<<<<<<< HEAD
-@custom-variant dark (&:is(.dark *));
-=======
 /* Remove @custom-variant as it's not supported in v4 */
->>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
 
 /* Cyber Theme Custom Properties */
 :root {
@@ -64,11 +60,7 @@ body {
   overflow-x: hidden;
 }
 
-<<<<<<< HEAD
-/* Cyber Grid Background */
-=======
 /* Enhanced Cyber Grid Background */
->>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
 body::before {
   content: '';
   position: fixed;
@@ -82,8 +74,6 @@ body::before {
   background-size: 50px 50px;
   pointer-events: none;
   z-index: -1;
-<<<<<<< HEAD
-=======
   animation: grid-pulse 4s ease-in-out infinite;
 }
 
@@ -212,7 +202,6 @@ body::before {
 /* Enhanced Gradient Classes */
 .bg-gradient-radial {
   background: radial-gradient(circle, var(--tw-gradient-stops));
->>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
 }
 
 /* Scrollbar Styling */
@@ -236,18 +225,6 @@ body::before {
   box-shadow: var(--cyber-glow-intense);
 }
 
-<<<<<<< HEAD
-/* Cyber UI Components */
-.cyber-card {
-  background: var(--cyber-gradient-surface);
-  border: 1px solid var(--cyber-border);
-  border-radius: 12px;
-  box-shadow: 
-    0 4px 20px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  transition: all var(--cyber-transition-normal) ease;
-=======
 /* Enhanced Cyber UI Components */
 .cyber-card {
   background: var(--cyber-gradient-surface);
@@ -272,18 +249,11 @@ body::before {
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--cyber-neon-cyan), transparent);
   opacity: 0.6;
->>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
 }
 
 .cyber-card:hover {
   border-color: var(--cyber-border-bright);
   box-shadow: 
-<<<<<<< HEAD
-    0 8px 30px rgba(0, 0, 0, 0.4),
-    var(--cyber-glow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px);
-=======
     0 12px 40px rgba(0, 0, 0, 0.5),
     var(--cyber-glow),
     0 0 0 1px rgba(0, 212, 255, 0.2),
@@ -323,23 +293,12 @@ body::before {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
->>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
 }
 
 .cyber-button {
   background: var(--cyber-gradient-accent);
   border: 1px solid var(--cyber-neon-blue);
   color: var(--cyber-text-primary);
-<<<<<<< HEAD
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  transition: all var(--cyber-transition-fast) ease;
-  position: relative;
-  overflow: hidden;
-=======
   padding: 14px 28px;
   border-radius: 12px;
   font-weight: 700;
@@ -351,7 +310,6 @@ body::before {
   box-shadow: 
     0 4px 15px rgba(0, 212, 255, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
->>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
 }
 
 .cyber-button::before {
@@ -361,11 +319,7 @@ body::before {
   left: -100%;
   width: 100%;
   height: 100%;
-<<<<<<< HEAD
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-=======
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
->>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
   transition: left var(--cyber-transition-slow) ease;
 }
 
@@ -374,20 +328,6 @@ body::before {
 }
 
 .cyber-button:hover {
-<<<<<<< HEAD
-  box-shadow: var(--cyber-glow-intense);
-  transform: translateY(-1px);
-}
-
-.cyber-input {
-  background: rgba(30, 30, 46, 0.8);
-  border: 1px solid var(--cyber-border);
-  border-radius: 8px;
-  padding: 12px 16px;
-  color: var(--cyber-text-primary);
-  font-family: 'JetBrains Mono', monospace;
-  transition: all var(--cyber-transition-normal) ease;
-=======
   box-shadow: 
     0 8px 25px rgba(0, 212, 255, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
@@ -410,31 +350,20 @@ body::before {
   transition: all var(--cyber-transition-normal) ease;
   backdrop-filter: blur(10px);
   position: relative;
->>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
 }
 
 .cyber-input:focus {
   outline: none;
   border-color: var(--cyber-neon-blue);
-<<<<<<< HEAD
-  box-shadow: var(--cyber-glow);
-  background: rgba(30, 30, 46, 1);
-=======
   box-shadow: 
     var(--cyber-glow),
     inset 0 0 20px rgba(0, 212, 255, 0.1);
   background: rgba(30, 30, 46, 1);
   transform: scale(1.02);
->>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
 }
 
 .cyber-input::placeholder {
   color: var(--cyber-text-muted);
-<<<<<<< HEAD
-}
-
-/* Terminal Styling */
-=======
   font-style: italic;
 }
 
@@ -634,7 +563,6 @@ body::before {
   box-shadow: var(--cyber-glow);
 }
 
->>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
 .cyber-terminal {
   background: #000008;
   border: 1px solid var(--cyber-neon-green);
@@ -913,17 +841,6 @@ body::before {
 
 /* Custom Component Overrides */
 [data-slot="card"] {
-<<<<<<< HEAD
-  @apply cyber-card;
-}
-
-[data-slot="button"] {
-  @apply cyber-button;
-}
-
-[data-slot="input"] {
-  @apply cyber-input;
-=======
   background: var(--cyber-surface);
   border: 1px solid var(--cyber-border);
   border-radius: 8px;
@@ -939,7 +856,6 @@ body::before {
   background: var(--cyber-surface);
   border: 1px solid var(--cyber-border);
   color: var(--cyber-text-primary);
->>>>>>> 892165d (Fixed UI , Updated Captcha , Improved Docker Deployment Guide.)
 }
 
 /* Specific overrides for better cyber aesthetic */
