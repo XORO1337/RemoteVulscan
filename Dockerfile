@@ -30,6 +30,8 @@ ENV NODE_ENV=production
 COPY --from=deps /app/node_modules ./node_modules
 # Copy the rest of the project files
 COPY . .
+# Generate Prisma client before building
+RUN npx prisma generate
 # Build Next.js (app router). Assumes "build" script exists in package.json
 RUN npm run build
 

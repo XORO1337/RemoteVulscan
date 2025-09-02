@@ -42,6 +42,8 @@ FROM base AS builder
 ENV NODE_ENV=production
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# Generate Prisma client before building
+RUN npx prisma generate
 RUN npm run build
 
 # -----------------------------------------------------------------------------
