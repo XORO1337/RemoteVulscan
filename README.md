@@ -1315,3 +1315,5 @@ You now have a complete, production-ready RemoteVulscan deployment! The applicat
 - Open an issue on GitHub with detailed steps and logs
 
 Happy scanning! 🛡️🚀
+
+### Made with ❤️ by Hardik 

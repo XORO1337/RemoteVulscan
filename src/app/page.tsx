@@ -669,6 +669,7 @@ export default function HomePage() {
                 <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
                 OPERATIONAL
               </Badge>
+              Made with ❤️ by Hardik
             </div>
           </div>
         </div>

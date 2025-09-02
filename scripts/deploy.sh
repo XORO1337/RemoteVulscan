@@ -6,6 +6,7 @@
 set -e
 
 echo "🚀 Deploying Vulnerability Scanner with Docker Compose"
+echo " Made with ❤️ by Hardik (@XORO1337) "
 echo "========================================================"
 
 # Colors for output
@@ -146,3 +147,4 @@ echo "   3. Select scan type and start scanning"
 echo "   4. View live results in the Live Results tab"
 echo "   5. Download HTML reports when scans complete"
 echo ""
+echo "Enjoy you Journey ❤️ "
