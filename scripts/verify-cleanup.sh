@@ -27,11 +27,11 @@ else
     exit 1
 fi
 
-# Check if package-lock.json is removed
-if [ ! -f "package-lock.json" ]; then
-    echo "✅ package-lock.json properly removed (using pnpm)"
+# Check if package-lock.json exists (using npm)
+if [ -f "package-lock.json" ]; then
+    echo "✅ package-lock.json exists (using npm)"
 else
-    echo "❌ package-lock.json still exists"
+    echo "❌ package-lock.json missing"
     exit 1
 fi
 

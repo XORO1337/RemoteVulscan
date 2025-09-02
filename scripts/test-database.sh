@@ -13,12 +13,12 @@ echo "📍 DATABASE_URL: $DATABASE_URL"
 # Ensure db directory exists
 mkdir -p db
 
-# Test with npx if pnpm doesn't work
+# Test with npm
 echo "⚙️  Generating Prisma client..."
-npx prisma generate
+npm run prisma:generate || npx prisma generate
 
 echo "📊 Creating database..."
-npx prisma db push --force-reset
+npm run prisma:push --force-reset || npx prisma db push --force-reset
 
 echo "🔍 Checking database file..."
 if [ -f "db/custom.db" ]; then

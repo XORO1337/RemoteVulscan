@@ -23,14 +23,11 @@ fi
 # Check if database file exists
 if [ ! -f "db/custom.db" ]; then
     echo "🗄️  Initializing database..."
-    if command -v pnpm &> /dev/null; then
-        pnpm prisma generate
-        pnpm prisma db push
-    elif command -v npm &> /dev/null; then
-        npm run prisma generate
-        npm run prisma db push
+    if command -v npm &> /dev/null; then
+        npm run prisma:generate
+        npm run prisma:push
     else
-        echo "❌ Neither pnpm nor npm found. Please install dependencies manually."
+        echo "❌ npm not found. Please install dependencies manually."
         exit 1
     fi
     echo "✅ Database initialized"
@@ -43,7 +40,7 @@ echo "🎉 Environment setup complete!"
 echo ""
 echo "📝 Next steps:"
 echo "1. Edit .env file and add your Turnstile keys"
-echo "2. Run 'pnpm dev' or 'npm run dev' to start the application"
+echo "2. Run 'npm run dev' to start the application"
 echo ""
 echo "🔗 Get Turnstile keys from: https://developers.cloudflare.com/turnstile/get-started/"
 echo ""

@@ -11,7 +11,6 @@ FROM archlinux:latest AS base
 
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
-    PNPM_VERSION=8.15.4 \
     TOOLS_PATH=/tools \
     PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/go/bin:${TOOLS_PATH}:${PATH}"
 
@@ -27,15 +26,14 @@ RUN pacman -Syu --noconfirm && \
       nmap masscan wfuzz whatweb dirb dirbuster skipfish wapiti testssl.sh sslscan \
       procps-ng && \
     update-ca-trust && \
-    npm install -g corepack && corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate && \
     mkdir -p ${TOOLS_PATH}
 
 # -----------------------------------------------------------------------------
-# Dependencies stage (cache pnpm install)
+# Dependencies stage (cache npm install)
 # -----------------------------------------------------------------------------
 FROM base AS deps
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+COPY package.json package-lock.json ./
+RUN npm ci
 
 # -----------------------------------------------------------------------------
 # Build stage
@@ -44,7 +42,7 @@ FROM base AS builder
 ENV NODE_ENV=production
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN pnpm build
+RUN npm run build
 
 # -----------------------------------------------------------------------------
 # Tools stage - install security tooling (can be cached separately)
@@ -82,7 +80,7 @@ ENV NEXT_PUBLIC_ENABLE_SOCKET=false \
 
 # Start command
 ENTRYPOINT ["/usr/bin/env"]
-CMD ["pnpm", "start"]
+CMD ["npm", "start"]
 
 # Usage examples (build & run):
 # docker build -f Dockerfile.arch -t remotevulscan:arch .

@@ -2,7 +2,7 @@
 
 
 # -----------------------
-# Base image with pnpm
+# Base image with npm
 # -----------------------
 FROM node:20-alpine AS base
 ENV NODE_ENV=production
@@ -12,18 +12,15 @@ WORKDIR /app
 # Install minimal OS deps needed by Next.js runtime and healthcheck
 RUN apk add --no-cache libc6-compat curl tini
 
-# Enable pnpm via corepack for deterministic installs
-RUN corepack enable && corepack prepare pnpm@8.15.4 --activate
-
 # -----------------------
 # Dependencies cache
 # -----------------------
 FROM base AS deps
 ENV NODE_ENV=development
 # Copy only lockfiles to maximize layer cache
-COPY package.json pnpm-lock.yaml ./
+COPY package.json package-lock.json ./
 # Install all deps (including dev for building)
-RUN pnpm install --frozen-lockfile
+RUN npm ci
 
 # -----------------------
 # Build the application
@@ -34,7 +31,7 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copy the rest of the project files
 COPY . .
 # Build Next.js (app router). Assumes "build" script exists in package.json
-RUN pnpm build
+RUN npm run build
 
 # -----------------------
 # Runtime (final) stage - must be named "app" to match docker-compose target
@@ -70,4 +67,4 @@ ENV TURNSTILE_SECRET_KEY=""
 ENTRYPOINT ["/sbin/tini", "--"]
 
 # Start the app
-CMD ["pnpm", "start"]
+CMD ["npm", "start"]

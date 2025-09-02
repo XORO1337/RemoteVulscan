@@ -46,23 +46,19 @@ fi
 
 # Generate Prisma client
 echo "⚙️  Generating Prisma client..."
-if command -v pnpm &> /dev/null; then
-    pnpm prisma generate
-elif command -v npm &> /dev/null; then
-    npm run prisma generate || npx prisma generate
+if command -v npm &> /dev/null; then
+    npm run prisma:generate || npx prisma generate
 else
-    echo "❌ Neither pnpm nor npm found"
+    echo "❌ npm not found"
     exit 1
 fi
 
 # Push database schema
 echo "📊 Creating database schema..."
-if command -v pnpm &> /dev/null; then
-    pnpm prisma db push
-elif command -v npm &> /dev/null; then
-    npm run prisma db push || npx prisma db push
+if command -v npm &> /dev/null; then
+    npm run prisma:push || npx prisma db push
 else
-    echo "❌ Neither pnpm nor npm found"
+    echo "❌ npm not found"
     exit 1
 fi
 
