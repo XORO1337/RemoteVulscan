@@ -8,6 +8,10 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
+import { spawn } from 'child_process';
+import { promisify } from 'util';
+import fs from 'fs/promises';
+import path from 'path';
 
 // Import middleware
 import { errorHandler } from '@/middleware/errorHandler';
@@ -25,9 +29,18 @@ import { logger } from '@/utils/logger';
 import { connectDatabase } from '@/utils/database';
 import { ScanOrchestrator } from '@/services/scanOrchestrator';
 import { WebSocketService } from '@/services/websocketService';
+import { ToolExecutionService } from '@/services/toolExecutionService';
 
 // Load environment variables
 dotenv.config();
+
+export interface ToolExecutionResult {
+  success: boolean;
+  output: string;
+  error?: string;
+  exitCode: number;
+  executionTime: number;
+}
 
 class BackendServer {
   private app: express.Application;
@@ -36,6 +49,7 @@ class BackendServer {
   // Use definite assignment assertions; they're initialized in setupServices()
   private scanOrchestrator!: ScanOrchestrator;
   private websocketService!: WebSocketService;
+  private toolExecutionService!: ToolExecutionService;
 
   constructor() {
     this.app = express();
@@ -103,6 +117,30 @@ class BackendServer {
       });
     });
 
+    // Tool execution endpoint
+    this.app.post('/api/v1/tools/execute', async (req, res) => {
+      try {
+        const { tool, args = [], target, timeout = 30000 } = req.body;
+        
+        if (!tool || !target) {
+          return res.status(400).json({
+            error: 'Tool and target are required',
+            timestamp: new Date().toISOString()
+          });
+        }
+
+        const result = await this.toolExecutionService.executeTool(tool, args, target, timeout);
+        res.json(result);
+      } catch (error) {
+        logger.error('Tool execution failed:', error);
+        res.status(500).json({
+          error: 'Tool execution failed',
+          details: error instanceof Error ? error.message : 'Unknown error',
+          timestamp: new Date().toISOString()
+        });
+      }
+    });
+
     // API routes
     this.app.use('/api/v1/scans', scansRouter);
     this.app.use('/api/v1/websites', websitesRouter);
@@ -162,10 +200,12 @@ class BackendServer {
   private setupServices(): void {
     this.websocketService = new WebSocketService(this.io);
     this.scanOrchestrator = new ScanOrchestrator(this.websocketService);
+    this.toolExecutionService = new ToolExecutionService();
     
     // Make services available to routes
     this.app.locals.scanOrchestrator = this.scanOrchestrator;
     this.app.locals.websocketService = this.websocketService;
+    this.app.locals.toolExecutionService = this.toolExecutionService;
   }
 
   private setupErrorHandling(): void {
@@ -197,6 +237,7 @@ class BackendServer {
         logger.info(`📚 API Documentation available at http://localhost:${port}/api/v1/docs`);
         logger.info(`🔍 Health check available at http://localhost:${port}/api/v1/health`);
         logger.info(`🌐 WebSocket server ready for real-time communications`);
+        logger.info(`🛠️ Tool execution service initialized`);
       });
     } catch (error) {
       logger.error('Failed to start server:', error);
@@ -220,6 +261,11 @@ class BackendServer {
     // Stop scan orchestrator
     if (this.scanOrchestrator) {
       await this.scanOrchestrator.shutdown();
+    }
+
+    // Stop tool execution service
+    if (this.toolExecutionService) {
+      await this.toolExecutionService.shutdown();
     }
 
     logger.info('Graceful shutdown completed');
