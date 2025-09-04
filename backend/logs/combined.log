@@ -1,0 +1,71 @@
+{"level":"info","message":"Database connected successfully","timestamp":"2025-09-04T14:13:17.283Z"}
+{"level":"info","message":"Backend listening on port 8000","timestamp":"2025-09-04T14:13:17.287Z"}
+{"level":"info","message":"Database connected successfully","timestamp":"2025-09-04T14:13:48.053Z"}
+{"level":"info","message":"Backend listening on port 8000","timestamp":"2025-09-04T14:13:48.057Z"}
+{"level":"info","message":"Database connected successfully","timestamp":"2025-09-04T16:12:55.714Z"}
+{"level":"info","message":"🚀 Backend API server started on port 8000","timestamp":"2025-09-04T16:12:55.727Z"}
+{"level":"info","message":"📚 API Documentation available at http://localhost:8000/api/v1/docs","timestamp":"2025-09-04T16:12:55.727Z"}
+{"level":"info","message":"🔍 Health check available at http://localhost:8000/api/v1/health","timestamp":"2025-09-04T16:12:55.728Z"}
+{"level":"info","message":"🌐 WebSocket server ready for real-time communications","timestamp":"2025-09-04T16:12:55.728Z"}
+{"level":"info","message":"Received SIGINT. Starting graceful shutdown...","timestamp":"2025-09-04T16:14:10.741Z"}
+{"level":"info","message":"Shutting down scan orchestrator...","timestamp":"2025-09-04T16:14:10.744Z"}
+{"level":"info","message":"HTTP server closed","timestamp":"2025-09-04T16:14:10.745Z"}
+{"level":"info","message":"WebSocket server closed","timestamp":"2025-09-04T16:14:10.746Z"}
+{"level":"info","message":"Received SIGINT. Starting graceful shutdown...","timestamp":"2025-09-04T16:14:10.747Z"}
+{"level":"info","message":"Shutting down scan orchestrator...","timestamp":"2025-09-04T16:14:10.747Z"}
+{"level":"info","message":"HTTP server closed","timestamp":"2025-09-04T16:14:10.748Z"}
+{"level":"info","message":"WebSocket server closed","timestamp":"2025-09-04T16:14:10.748Z"}
+{"level":"info","message":"Received SIGINT. Starting graceful shutdown...","timestamp":"2025-09-04T16:14:13.181Z"}
+{"level":"info","message":"Shutting down scan orchestrator...","timestamp":"2025-09-04T16:14:13.181Z"}
+{"level":"info","message":"HTTP server closed","timestamp":"2025-09-04T16:14:13.182Z"}
+{"level":"info","message":"WebSocket server closed","timestamp":"2025-09-04T16:14:13.182Z"}
+{"level":"info","message":"Database connected successfully","timestamp":"2025-09-04T16:37:33.562Z"}
+{"level":"info","message":"🚀 Backend API server started on port 8000","timestamp":"2025-09-04T16:37:33.572Z"}
+{"level":"info","message":"📚 API Documentation available at http://localhost:8000/api/v1/docs","timestamp":"2025-09-04T16:37:33.573Z"}
+{"level":"info","message":"🔍 Health check available at http://localhost:8000/api/v1/health","timestamp":"2025-09-04T16:37:33.573Z"}
+{"level":"info","message":"🌐 WebSocket server ready for real-time communications","timestamp":"2025-09-04T16:37:33.573Z"}
+{"level":"warn","message":"Redis unavailable, falling back to direct mode. Set REDIS_ENABLED=false to suppress probe. Reason:","timestamp":"2025-09-04T16:37:33.576Z"}
+{"level":"info","message":"Operating in direct in-process scan mode.","timestamp":"2025-09-04T16:37:33.577Z"}
+{"level":"info","message":"Database connected successfully","timestamp":"2025-09-04T16:39:16.436Z"}
+{"level":"info","message":"🚀 Backend API server started on port 8000","timestamp":"2025-09-04T16:39:16.446Z"}
+{"level":"info","message":"📚 API Documentation available at http://localhost:8000/api/v1/docs","timestamp":"2025-09-04T16:39:16.446Z"}
+{"level":"info","message":"🔍 Health check available at http://localhost:8000/api/v1/health","timestamp":"2025-09-04T16:39:16.447Z"}
+{"level":"info","message":"🌐 WebSocket server ready for real-time communications","timestamp":"2025-09-04T16:39:16.447Z"}
+{"level":"warn","message":"Redis unavailable, falling back to direct mode. Set REDIS_ENABLED=false to suppress probe. Reason:","timestamp":"2025-09-04T16:39:16.450Z"}
+{"level":"info","message":"Operating in direct in-process scan mode.","timestamp":"2025-09-04T16:39:16.450Z"}
+{"ip":"::1","level":"info","message":"Request started","method":"GET","requestId":"8da72cb7-7d95-4678-97ff-db5ab2101f9b","timestamp":"2025-09-04T16:39:34.905Z","url":"/","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"}
+{"duration":"3ms","ip":"::1","level":"info","message":"Request completed","method":"GET","requestId":"8da72cb7-7d95-4678-97ff-db5ab2101f9b","statusCode":404,"timestamp":"2025-09-04T16:39:34.909Z","url":"/"}
+{"level":"info","message":"::1 - - [04/Sep/2025:16:39:34 +0000] \"GET / HTTP/1.1\" 404 90 \"https://github.com/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36\"","timestamp":"2025-09-04T16:39:34.912Z"}
+{"ip":"::1","level":"info","message":"Request started","method":"GET","requestId":"18a80dc4-7f8b-4ad6-862b-3f3dac40f82c","timestamp":"2025-09-04T16:39:35.254Z","url":"/favicon.ico","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"}
+{"duration":"1ms","ip":"::1","level":"info","message":"Request completed","method":"GET","requestId":"18a80dc4-7f8b-4ad6-862b-3f3dac40f82c","statusCode":404,"timestamp":"2025-09-04T16:39:35.255Z","url":"/"}
+{"level":"info","message":"::1 - - [04/Sep/2025:16:39:35 +0000] \"GET /favicon.ico HTTP/1.1\" 404 101 \"https://supreme-dollop-r46jg7596r9hx6r9-8000.app.github.dev/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36\"","timestamp":"2025-09-04T16:39:35.256Z"}
+{"ip":"::1","level":"info","message":"Request started","method":"GET","requestId":"9860f024-1ff8-4b7f-98c9-2273015cfb05","timestamp":"2025-09-04T16:39:58.957Z","url":"/api/v1/scans","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"}
+{"duration":"2ms","level":"debug","message":"Database Query:","params":"[]","query":"SELECT 1","timestamp":"2025-09-04T16:39:58.967Z"}
+{"duration":"0ms","level":"debug","message":"Database Query:","params":"[-1,0]","query":"SELECT COUNT(*) FROM (SELECT `main`.`Scan`.`id` FROM `main`.`Scan` WHERE 1=1 LIMIT ? OFFSET ?) AS `sub`","timestamp":"2025-09-04T16:39:58.967Z"}
+{"duration":"1ms","level":"debug","message":"Database Query:","params":"[20,0]","query":"SELECT `main`.`Scan`.`id`, `main`.`Scan`.`websiteId`, `main`.`Scan`.`status`, `main`.`Scan`.`scanType`, `main`.`Scan`.`scanMode`, `main`.`Scan`.`startedAt`, `main`.`Scan`.`completedAt`, `main`.`Scan`.`errorMessage`, `main`.`Scan`.`results`, `main`.`Scan`.`metadata`, `main`.`Scan`.`progress`, `main`.`Scan`.`totalSteps`, `main`.`Scan`.`createdAt`, `main`.`Scan`.`updatedAt` FROM `main`.`Scan` WHERE 1=1 ORDER BY `main`.`Scan`.`createdAt` DESC LIMIT ? OFFSET ?","timestamp":"2025-09-04T16:39:58.968Z"}
+{"duration":"11ms","ip":"::1","level":"info","message":"Request completed","method":"GET","requestId":"9860f024-1ff8-4b7f-98c9-2273015cfb05","statusCode":200,"timestamp":"2025-09-04T16:39:58.968Z","url":"/"}
+{"level":"info","message":"::1 - - [04/Sep/2025:16:39:58 +0000] \"GET /api/v1/scans HTTP/1.1\" 200 135 \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36\"","timestamp":"2025-09-04T16:39:58.969Z"}
+{"level":"info","message":"Received SIGTERM. Starting graceful shutdown...","timestamp":"2025-09-04T16:53:03.750Z"}
+{"level":"info","message":"Database connected successfully","timestamp":"2025-09-04T16:54:45.992Z"}
+{"level":"info","message":"🚀 Backend API server started on port 8000","timestamp":"2025-09-04T16:54:46.002Z"}
+{"level":"info","message":"📚 API Documentation available at http://localhost:8000/api/v1/docs","timestamp":"2025-09-04T16:54:46.002Z"}
+{"level":"info","message":"🔍 Health check available at http://localhost:8000/api/v1/health","timestamp":"2025-09-04T16:54:46.003Z"}
+{"level":"info","message":"🌐 WebSocket server ready for real-time communications","timestamp":"2025-09-04T16:54:46.003Z"}
+{"level":"warn","message":"Redis unavailable, falling back to direct mode. Set REDIS_ENABLED=false to suppress probe. Reason:","timestamp":"2025-09-04T16:54:46.007Z"}
+{"level":"info","message":"Operating in direct in-process scan mode.","timestamp":"2025-09-04T16:54:46.007Z"}
+{"level":"info","message":"Received SIGTERM. Starting graceful shutdown...","timestamp":"2025-09-04T17:10:00.360Z"}
+{"level":"info","message":"Database connected successfully","timestamp":"2025-09-04T17:10:02.916Z"}
+{"level":"info","message":"🚀 Backend API server started on port 8000","timestamp":"2025-09-04T17:10:02.953Z"}
+{"level":"info","message":"📚 API Documentation available at http://localhost:8000/api/v1/docs","timestamp":"2025-09-04T17:10:02.955Z"}
+{"level":"info","message":"🔍 Health check available at http://localhost:8000/api/v1/health","timestamp":"2025-09-04T17:10:02.956Z"}
+{"level":"info","message":"🌐 WebSocket server ready for real-time communications","timestamp":"2025-09-04T17:10:02.956Z"}
+{"level":"warn","message":"Redis unavailable, falling back to direct mode. Set REDIS_ENABLED=false to suppress probe. Reason:","timestamp":"2025-09-04T17:10:02.969Z"}
+{"level":"info","message":"Operating in direct in-process scan mode.","timestamp":"2025-09-04T17:10:02.970Z"}
+{"level":"info","message":"Received SIGTERM. Starting graceful shutdown...","timestamp":"2025-09-04T17:10:14.226Z"}
+{"level":"info","message":"Database connected successfully","timestamp":"2025-09-04T17:10:15.630Z"}
+{"level":"info","message":"🚀 Backend API server started on port 8000","timestamp":"2025-09-04T17:10:15.640Z"}
+{"level":"info","message":"📚 API Documentation available at http://localhost:8000/api/v1/docs","timestamp":"2025-09-04T17:10:15.640Z"}
+{"level":"info","message":"🔍 Health check available at http://localhost:8000/api/v1/health","timestamp":"2025-09-04T17:10:15.640Z"}
+{"level":"info","message":"🌐 WebSocket server ready for real-time communications","timestamp":"2025-09-04T17:10:15.641Z"}
+{"level":"warn","message":"Redis unavailable, falling back to direct mode. Set REDIS_ENABLED=false to suppress probe. Reason:","timestamp":"2025-09-04T17:10:15.644Z"}
+{"level":"info","message":"Operating in direct in-process scan mode.","timestamp":"2025-09-04T17:10:15.644Z"}

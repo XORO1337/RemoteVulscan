@@ -1,0 +1,208 @@
+version: '3.8'
+
+services:
+  # Backend API Service
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: remotevulscan-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=file:./data/db/custom.db
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - TOOLS_API_URL=http://tools:3001
+      - FRONTEND_URL=http://frontend:3000
+      - PORT=8000
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./reports:/app/reports
+    depends_on:
+      - db
+      - redis
+      - tools
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend Web Application
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: remotevulscan-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_WS_URL=ws://localhost:8000
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Security Tools Container with API
+  tools:
+    build:
+      context: .
+      dockerfile: Dockerfile.tools
+    container_name: remotevulscan-tools
+    ports:
+      - "3001:3001"  # Tools API port
+    volumes:
+      - ./tools:/tools/external
+      - ./data/reports:/tools/reports
+      - ./data/logs:/tools/logs
+    environment:
+      - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/go/bin
+      - START_API=true
+      - TOOLS_API_PORT=3001
+      - NODE_ENV=production
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    command: api
+
+  # Database (SQLite - file-based)
+  db:
+    image: alpine:latest
+    container_name: remotevulscan-db
+    volumes:
+      - ./data/db:/data/db
+      - ./scripts/init-db.sh:/init-db.sh:ro
+    environment:
+      - SQLITE_DB_PATH=/data/db/custom.db
+    networks:
+      - app-network
+    restart: unless-stopped
+    command: >
+      sh -c "
+        apk add --no-cache sqlite &&
+        chmod +x /init-db.sh &&
+        /init-db.sh &&
+        tail -f /dev/null
+      "
+
+  # Redis for job queuing and caching
+  redis:
+    image: redis:7-alpine
+    container_name: remotevulscan-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    command: redis-server --appendonly yes
+
+  # Nginx Reverse Proxy (Optional - for production)
+  nginx:
+    image: nginx:alpine
+    container_name: remotevulscan-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - app-network
+    restart: unless-stopped
+    profiles:
+      - production
+
+  # Log Management (Optional - for centralized logging)
+  fluentd:
+    image: fluent/fluentd:v1.16-1
+    container_name: remotevulscan-logs
+    volumes:
+      - ./fluentd/conf:/fluentd/etc
+      - ./logs:/fluentd/log
+    networks:
+      - app-network
+    restart: unless-stopped
+    profiles:
+      - logging
+
+  # Monitoring with Prometheus (Optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: remotevulscan-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - app-network
+    restart: unless-stopped
+    profiles:
+      - monitoring
+
+  # Grafana for dashboards (Optional)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: remotevulscan-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+    networks:
+      - app-network
+    restart: unless-stopped
+    profiles:
+      - monitoring
+
+volumes:
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

@@ -1,0 +1,634 @@
+openapi: 3.0.0
+info:
+  title: RemoteVulscan API
+  version: 1.0.0
+  description: |
+    A comprehensive security scanning API that provides vulnerability assessment capabilities
+    through a robust, containerized microservices architecture.
+    
+    ## Features
+    - Asynchronous scan processing with job queuing
+    - Real-time updates via WebSocket
+    - Multiple security tools integration
+    - Comprehensive vulnerability database
+    - Rate limiting and security measures
+    
+    ## Authentication
+    API key authentication is supported via the `X-API-Key` header.
+    
+  contact:
+    name: API Support
+    email: support@remotevulscan.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8000
+    description: Development server
+  - url: https://api.remotevulscan.com
+    description: Production server
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  
+  schemas:
+    Error:
+      type: object
+      required:
+        - error
+        - message
+        - timestamp
+      properties:
+        error:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Validation error"
+        statusCode:
+          type: integer
+          example: 400
+        timestamp:
+          type: string
+          format: date-time
+          example: "2024-01-01T00:00:00.000Z"
+    
+    Pagination:
+      type: object
+      properties:
+        currentPage:
+          type: integer
+          example: 1
+        totalPages:
+          type: integer
+          example: 10
+        totalItems:
+          type: integer
+          example: 100
+        itemsPerPage:
+          type: integer
+          example: 20
+        hasNextPage:
+          type: boolean
+          example: true
+        hasPreviousPage:
+          type: boolean
+          example: false
+    
+    Website:
+      type: object
+      required:
+        - id
+        - url
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          example: "clp1234567890"
+        url:
+          type: string
+          format: uri
+          example: "https://example.com"
+        name:
+          type: string
+          example: "Example Website"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    
+    Scan:
+      type: object
+      required:
+        - id
+        - websiteId
+        - status
+        - scanType
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          example: "clp1234567890"
+        websiteId:
+          type: string
+          example: "clp0987654321"
+        status:
+          type: string
+          enum: [PENDING, QUEUED, RUNNING, COMPLETED, FAILED, CANCELLED]
+          example: "COMPLETED"
+        scanType:
+          type: string
+          enum: [NMAP, NIKTO, NUCLEI, TESTSSL, SSLSCAN, SQLMAP, FULL_SCAN, ADVANCED_SCAN]
+          example: "NUCLEI"
+        scanMode:
+          type: string
+          example: "full_scan"
+        startedAt:
+          type: string
+          format: date-time
+          nullable: true
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        errorMessage:
+          type: string
+          nullable: true
+        progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+          example: 75
+        totalSteps:
+          type: integer
+          example: 4
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        website:
+          $ref: '#/components/schemas/Website'
+        vulnerabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vulnerability'
+    
+    Vulnerability:
+      type: object
+      required:
+        - id
+        - scanId
+        - severity
+        - type
+        - title
+        - createdAt
+      properties:
+        id:
+          type: string
+          example: "clp1234567890"
+        scanId:
+          type: string
+          example: "clp0987654321"
+        severity:
+          type: string
+          enum: [CRITICAL, HIGH, MEDIUM, LOW, INFO]
+          example: "HIGH"
+        type:
+          type: string
+          example: "SQL Injection"
+        title:
+          type: string
+          example: "SQL injection vulnerability detected"
+        description:
+          type: string
+          nullable: true
+          example: "SQL injection vulnerability found in login form"
+        solution:
+          type: string
+          nullable: true
+          example: "Use parameterized queries"
+        reference:
+          type: string
+          nullable: true
+          example: "https://cwe.mitre.org/data/definitions/89.html"
+        location:
+          type: string
+          nullable: true
+          example: "/login.php?id=1"
+        port:
+          type: integer
+          nullable: true
+          example: 443
+        service:
+          type: string
+          nullable: true
+          example: "https"
+        cvss:
+          type: number
+          format: float
+          nullable: true
+          example: 7.5
+        cve:
+          type: string
+          nullable: true
+          example: "CVE-2021-12345"
+        tool:
+          type: string
+          nullable: true
+          example: "nuclei"
+        createdAt:
+          type: string
+          format: date-time
+    
+    ToolInfo:
+      type: object
+      required:
+        - available
+        - category
+        - binary
+      properties:
+        available:
+          type: boolean
+          example: true
+        version:
+          type: string
+          example: "v3.1.0"
+        category:
+          type: string
+          example: "web"
+        binary:
+          type: string
+          example: "nuclei"
+        error:
+          type: string
+          nullable: true
+          example: "Tool not found"
+    
+    ScanRequest:
+      type: object
+      required:
+        - url
+        - scanType
+      properties:
+        url:
+          type: string
+          format: uri
+          example: "https://example.com"
+        scanType:
+          type: string
+          enum: [NMAP, NIKTO, NUCLEI, TESTSSL, SSLSCAN, SQLMAP, FULL_SCAN, ADVANCED_SCAN]
+          example: "NUCLEI"
+        scanMode:
+          type: string
+          example: "vulnerability_assessment"
+        options:
+          type: object
+          properties:
+            args:
+              type: array
+              items:
+                type: string
+              example: ["-severity", "high,critical"]
+            timeout:
+              type: integer
+              minimum: 1000
+              maximum: 3600000
+              example: 300000
+            priority:
+              type: integer
+              minimum: 1
+              maximum: 10
+              example: 5
+
+paths:
+  /api/v1/health:
+    get:
+      summary: Health check endpoint
+      tags: [System]
+      responses:
+        '200':
+          description: System is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  timestamp:
+                    type: string
+                    format: date-time
+                  uptime:
+                    type: number
+                    example: 3600.5
+                  responseTime:
+                    type: string
+                    example: "15ms"
+                  version:
+                    type: string
+                    example: "1.0.0"
+                  services:
+                    type: object
+        '503':
+          description: System is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/scans:
+    get:
+      summary: Get all scans with pagination
+      tags: [Scans]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, QUEUED, RUNNING, COMPLETED, FAILED, CANCELLED]
+      responses:
+        '200':
+          description: List of scans
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  scans:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Scan'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+    
+    post:
+      summary: Create a new scan
+      tags: [Scans]
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScanRequest'
+      responses:
+        '201':
+          description: Scan created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  scan:
+                    $ref: '#/components/schemas/Scan'
+                  jobId:
+                    type: string
+                    example: "job_1234567890"
+                  message:
+                    type: string
+                    example: "Scan created and queued successfully"
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/scans/{id}:
+    get:
+      summary: Get scan by ID
+      tags: [Scans]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Scan details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scan'
+        '404':
+          description: Scan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/scans/{id}/cancel:
+    post:
+      summary: Cancel a scan
+      tags: [Scans]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Scan cancelled successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Scan cancelled successfully"
+                  scanId:
+                    type: string
+        '404':
+          description: Scan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/scans/stats:
+    get:
+      summary: Get scan statistics
+      tags: [Scans]
+      responses:
+        '200':
+          description: Scan statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  scans:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      completed:
+                        type: integer
+                      failed:
+                        type: integer
+                      running:
+                        type: integer
+                      pending:
+                        type: integer
+                      successRate:
+                        type: number
+                        format: float
+                  vulnerabilities:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      critical:
+                        type: integer
+                      high:
+                        type: integer
+                  queue:
+                    type: object
+                    properties:
+                      waiting:
+                        type: integer
+                      active:
+                        type: integer
+
+  /api/v1/websites:
+    get:
+      summary: Get all websites
+      tags: [Websites]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of websites
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  websites:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Website'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+    
+    post:
+      summary: Add a new website
+      tags: [Websites]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - url
+              properties:
+                url:
+                  type: string
+                  format: uri
+                name:
+                  type: string
+      responses:
+        '201':
+          description: Website created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Website'
+        '409':
+          description: Website already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/tools:
+    get:
+      summary: Get available security tools
+      tags: [Tools]
+      responses:
+        '200':
+          description: List of available tools
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tools:
+                    type: object
+                    additionalProperties:
+                      $ref: '#/components/schemas/ToolInfo'
+                  categories:
+                    type: array
+                    items:
+                      type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /api/v1/tools/{toolName}:
+    get:
+      summary: Get information about a specific tool
+      tags: [Tools]
+      parameters:
+        - name: toolName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Tool information
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ToolInfo'
+                  - type: object
+                    properties:
+                      name:
+                        type: string
+                      documentation:
+                        type: object
+                      usageExamples:
+                        type: array
+                        items:
+                          type: string
+        '404':
+          description: Tool not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+tags:
+  - name: System
+    description: System health and information endpoints
+  - name: Scans
+    description: Vulnerability scan management
+  - name: Websites
+    description: Website target management
+  - name: Tools
+    description: Security tools information
