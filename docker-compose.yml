@@ -37,21 +37,34 @@ services:
       retries: 3
       start_period: 40s
 
-  # Security Tools Container
+  # Security Tools Container with API
   tools:
     build:
       context: .
       dockerfile: Dockerfile.tools
     container_name: vuln-scanner-tools
+    ports:
+      - "3001:3001"  # Tools API port
     volumes:
-      - ./tools:/tools
+      - ./tools:/tools/external
       - ./scripts:/scripts
+      - ./data/reports:/tools/reports
+      - ./data/logs:/tools/logs
     environment:
       - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/go/bin
+      - START_API=true
+      - TOOLS_API_PORT=3001
+      - NODE_ENV=production
     networks:
       - vuln-scanner-network
     restart: unless-stopped
-    command: /tools/entrypoint.sh sleep infinity
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    command: api
 
   # Database (SQLite - file-based)
   db:

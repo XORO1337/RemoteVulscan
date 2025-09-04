@@ -29,6 +29,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "URL and scan type are required" }, { status: 400 })
     }
 
+    // Validate scan type
+    const validScanTypes = [
+      'NMAP', 'NIKTO', 'SSL_CHECK', 'HEADER_ANALYSIS', 'NUCLEI', 'SQLMAP', 
+      'VULS', 'COMMIX', 'NETTACKER', 'CORSY', 'CSP_EVAL', 'OPEN_REDIRECT_CHECK', 
+      'EXPOSED_FILES', 'FULL_SCAN',
+      // New advanced scan modes
+      'NETWORK_RECONNAISSANCE', 'WEB_APPLICATION_SCAN', 'SSL_TLS_ANALYSIS',
+      'DIRECTORY_ENUMERATION', 'SQL_INJECTION_TEST', 'VULNERABILITY_ASSESSMENT'
+    ]
+
+    if (!validScanTypes.includes(scanType)) {
+      return NextResponse.json({ error: "Invalid scan type" }, { status: 400 })
+    }
+
     if (!process.env.TURNSTILE_SECRET_KEY) {
       return NextResponse.json(
         { error: "CAPTCHA not configured on server. Set TURNSTILE_SECRET_KEY." },

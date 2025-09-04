@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { VulnerabilityScanner } from '@/lib/scanners/vulnerability-scanner'
+import { executeScan } from '@/lib/scanners/scan-orchestrator'
 import { getServer } from '@/lib/socket'
 
 export async function POST(request: NextRequest) {
@@ -30,27 +30,20 @@ export async function POST(request: NextRequest) {
     // Get socket.io server instance
     const io = getServer()
     
-    // Create a socket-like interface for the scanner
-    const socketInterface = io || {
-      to: (room: string) => ({
-        emit: (event: string, data: any) => {
-          console.log(`Socket emit: ${event} to ${room}`, data)
-        }
-      })
-    }
-    
-    // Create scanner instance and start scan
-    const scanner = new VulnerabilityScanner(socketInterface)
-    
-    // Start scan in background (don't await)
-    scanner.startScan(scanId, scan.website.url, scan.scanType)
-      .catch(error => {
-        console.error('Background scan failed:', error)
-      })
+    // Start scan using the orchestrator (don't await - run in background)
+    executeScan(io, {
+      scanId,
+      target: scan.website.url,
+      scanMode: scan.scanType,
+      priority: 'normal'
+    }).catch(error => {
+      console.error('Scan execution failed:', error)
+    })
 
     return NextResponse.json({ 
       message: 'Scan started successfully', 
       scanId,
+      scanType: scan.scanType,
       hasRealTime: !!io
     })
   } catch (error) {
