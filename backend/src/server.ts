@@ -8,10 +8,6 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
-import { spawn } from 'child_process';
-import { promisify } from 'util';
-import fs from 'fs/promises';
-import path from 'path';
 
 // Import middleware
 import { errorHandler } from '@/middleware/errorHandler';
@@ -34,19 +30,10 @@ import { ToolExecutionService } from '@/services/toolExecutionService';
 // Load environment variables
 dotenv.config();
 
-export interface ToolExecutionResult {
-  success: boolean;
-  output: string;
-  error?: string;
-  exitCode: number;
-  executionTime: number;
-}
-
 class BackendServer {
   private app: express.Application;
   private server: any;
   private io: Server;
-  // Use definite assignment assertions; they're initialized in setupServices()
   private scanOrchestrator!: ScanOrchestrator;
   private websocketService!: WebSocketService;
   private toolExecutionService!: ToolExecutionService;
@@ -120,7 +107,7 @@ class BackendServer {
     // Tool execution endpoint
     this.app.post('/api/v1/tools/execute', async (req, res) => {
       try {
-        const { tool, args = [], target, timeout = 30000 } = req.body;
+        const { tool, args = [], target, timeout } = req.body;
         
         if (!tool || !target) {
           return res.status(400).json({
@@ -136,6 +123,52 @@ class BackendServer {
         res.status(500).json({
           error: 'Tool execution failed',
           details: error instanceof Error ? error.message : 'Unknown error',
+          timestamp: new Date().toISOString()
+        });
+      }
+    });
+
+    // Multiple tools execution endpoint
+    this.app.post('/api/v1/tools/execute-multiple', async (req, res) => {
+      try {
+        const { tools, target, mode = 'parallel' } = req.body;
+        
+        if (!tools || !Array.isArray(tools) || !target) {
+          return res.status(400).json({
+            error: 'Tools array and target are required',
+            timestamp: new Date().toISOString()
+          });
+        }
+
+        const results = await this.toolExecutionService.executeMultipleTools(tools, target, mode);
+        const report = await this.toolExecutionService.generateScanReport(results);
+        res.json(report);
+      } catch (error) {
+        logger.error('Multiple tools execution failed:', error);
+        res.status(500).json({
+          error: 'Multiple tools execution failed',
+          details: error instanceof Error ? error.message : 'Unknown error',
+          timestamp: new Date().toISOString()
+        });
+      }
+    });
+
+    // Tool information endpoint
+    this.app.get('/api/v1/tools/info', async (req, res) => {
+      try {
+        const tools = await this.toolExecutionService.getAvailableTools();
+        const stats = this.toolExecutionService.getExecutionStats();
+        
+        res.json({
+          tools: Object.fromEntries(tools),
+          categories: this.toolExecutionService.getCategories(),
+          statistics: stats,
+          timestamp: new Date().toISOString()
+        });
+      } catch (error) {
+        logger.error('Failed to get tools info:', error);
+        res.status(500).json({
+          error: 'Failed to get tools information',
           timestamp: new Date().toISOString()
         });
       }
@@ -227,8 +260,9 @@ class BackendServer {
     try {
       // Connect to database
       await connectDatabase();
-  // Now that the database is connected, initialize dependent services
-  this.setupServices();
+      
+      // Initialize services after database connection
+      this.setupServices();
       
       const port = process.env.PORT || 8000;
       
@@ -237,7 +271,7 @@ class BackendServer {
         logger.info(`📚 API Documentation available at http://localhost:${port}/api/v1/docs`);
         logger.info(`🔍 Health check available at http://localhost:${port}/api/v1/health`);
         logger.info(`🌐 WebSocket server ready for real-time communications`);
-        logger.info(`🛠️ Tool execution service initialized`);
+        logger.info(`🛠️  Tool execution service initialized`);
       });
     } catch (error) {
       logger.error('Failed to start server:', error);
@@ -248,24 +282,31 @@ class BackendServer {
   private async shutdown(signal: string): Promise<void> {
     logger.info(`Received ${signal}. Starting graceful shutdown...`);
     
-    // Close server
-    this.server.close(() => {
-      logger.info('HTTP server closed');
-    });
+    try {
+      // Stop scan orchestrator
+      if (this.scanOrchestrator) {
+        logger.info('Shutting down scan orchestrator...');
+        await this.scanOrchestrator.shutdown();
+      }
 
-    // Close WebSocket connections
-    this.io.close(() => {
-      logger.info('WebSocket server closed');
-    });
+      // Stop tool execution service
+      if (this.toolExecutionService) {
+        logger.info('Shutting down tool execution service...');
+        await this.toolExecutionService.shutdown();
+      }
 
-    // Stop scan orchestrator
-    if (this.scanOrchestrator) {
-      await this.scanOrchestrator.shutdown();
-    }
+      // Close server
+      this.server.close(() => {
+        logger.info('HTTP server closed');
+      });
 
-    // Stop tool execution service
-    if (this.toolExecutionService) {
-      await this.toolExecutionService.shutdown();
+      // Close WebSocket connections
+      this.io.close(() => {
+        logger.info('WebSocket server closed');
+      });
+
+    } catch (error) {
+      logger.error('Error during shutdown:', error);
     }
 
     logger.info('Graceful shutdown completed');

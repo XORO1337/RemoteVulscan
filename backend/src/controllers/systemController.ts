@@ -18,9 +18,10 @@ import { WebSocketService } from '@/services/websocketService';
 export const healthCheck = asyncHandler(async (req: Request, res: Response) => {
   const startTime = Date.now();
   
-  // Check tools API health
-  const toolsClient = new ToolsAPIClient();
-  const toolsHealthy = await toolsClient.healthCheck();
+  // Check tool execution service health
+  const toolExecutionService = req.app.locals.toolExecutionService;
+  const toolStats = toolExecutionService.getExecutionStats();
+  const toolsHealthy = toolStats.availableTools > 0;
   
   // Check WebSocket service
   const websocketService = req.app.locals.websocketService as WebSocketService;
@@ -44,9 +45,11 @@ export const healthCheck = asyncHandler(async (req: Request, res: Response) => {
         status: 'healthy',
         responseTime: `${responseTime}ms`
       },
-      toolsApi: {
+      toolExecution: {
         status: toolsHealthy ? 'healthy' : 'unhealthy',
-        url: process.env.TOOLS_API_URL || 'http://localhost:3001'
+        availableTools: toolStats.availableTools,
+        totalTools: toolStats.totalTools,
+        activeExecutions: toolStats.activeExecutions
       },
       websocket: {
         status: 'healthy',
@@ -230,7 +233,8 @@ export const getSystemConfig = asyncHandler(async (req: Request, res: Response) 
       realTimeUpdates: true,
       asyncProcessing: true,
       queueManagement: true,
-      apiDocumentation: true
+      apiDocumentation: true,
+      integratedToolExecution: true
     }
   };
   

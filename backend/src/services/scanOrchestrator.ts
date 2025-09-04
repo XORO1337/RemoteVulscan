@@ -3,7 +3,7 @@ import IORedis from 'ioredis';
 import { getDatabase } from '@/utils/database';
 import { logger } from '@/utils/logger';
 import { WebSocketService } from './websocketService';
-import { ToolsAPIClient } from './toolsApiClient';
+import { ToolExecutionService } from './toolExecutionService';
 // Prisma enums replaced with strings (SQLite). Define local constants.
 export const ScanStatus = {
   PENDING: 'PENDING',
@@ -48,7 +48,7 @@ export class ScanOrchestrator {
   private scanQueue: Queue | null = null;
   private scanWorker: Worker | null = null;
   private websocketService: WebSocketService;
-  private toolsClient: ToolsAPIClient;
+  private toolExecutionService: ToolExecutionService;
   private db: ReturnType<typeof getDatabase>;
   private redisEnabled: boolean;
   private redisCheckCompleted = false;
@@ -56,7 +56,7 @@ export class ScanOrchestrator {
   constructor(websocketService: WebSocketService) {
     this.websocketService = websocketService;
     this.db = getDatabase();
-    this.toolsClient = new ToolsAPIClient();
+    this.toolExecutionService = new ToolExecutionService();
     this.redisEnabled = (process.env.REDIS_ENABLED ?? 'true').toLowerCase() !== 'false';
 
     if (!this.redisEnabled) {
@@ -340,15 +340,15 @@ export class ScanOrchestrator {
     }
 
     // Execute tool
-    const toolResult = await this.toolsClient.executeTool({
+    const toolResult = await this.toolExecutionService.executeTool(
       tool,
-      target: url,
-      args: options?.args || [],
-      timeout: options?.timeout
-    });
+      options?.args || [],
+      url,
+      options?.timeout
+    );
 
     // Parse vulnerabilities
-    const vulnerabilities = this.parseVulnerabilities(tool, toolResult.output);
+    const vulnerabilities = this.parseVulnerabilities(tool, toolResult.output || '');
 
     return {
       scanId,
@@ -373,35 +373,36 @@ export class ScanOrchestrator {
     await job.updateProgress({ stage: 'preparation', tools: tools.length });
 
     // Execute scan
-    const scanResult = await this.toolsClient.executeScan({
-      tools: tools.map(tool => ({ tool, args: options?.args || [] })),
-      target: url,
-      mode: 'parallel',
-      scanId
-    });
+    const toolsToExecute = tools.map(tool => ({ name: tool, args: options?.args || [] }));
+    const scanResults = await this.toolExecutionService.executeMultipleTools(
+      toolsToExecute,
+      url,
+      'parallel'
+    );
 
     // Update progress
-    await job.updateProgress({ stage: 'completed', completedTools: scanResult.results.length });
+    await job.updateProgress({ stage: 'completed', completedTools: scanResults.length });
 
     // Parse all vulnerabilities
     const allVulnerabilities: any[] = [];
-    for (const result of scanResult.results) {
+    for (const result of scanResults) {
       if (result.success) {
-        const vulns = this.parseVulnerabilities(result.tool, result.output);
+        const toolName = result.command.split(' ')[0];
+        const vulns = this.parseVulnerabilities(toolName, result.output || '');
         allVulnerabilities.push(...vulns);
       }
     }
 
     return {
       scanId,
-  success: scanResult.results.some((r: any) => r.success),
+      success: scanResults.some(r => r.success),
       vulnerabilities: allVulnerabilities,
-      toolResults: scanResult.results,
+      toolResults: scanResults,
       metadata: {
         scanMode,
-        totalTools: scanResult.results.length,
-  successfulTools: scanResult.results.filter((r: any) => r.success).length,
-        executionTime: scanResult.totalExecutionTime,
+        totalTools: scanResults.length,
+        successfulTools: scanResults.filter(r => r.success).length,
+        executionTime: scanResults.reduce((sum, r) => sum + r.executionTime, 0),
         timestamp: new Date().toISOString()
       }
     };

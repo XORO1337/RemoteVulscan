@@ -14,14 +14,17 @@ import { ToolsAPIClient } from '@/services/toolsApiClient';
  *         description: List of available security tools
  */
 export const getAvailableTools = asyncHandler(async (req: Request, res: Response) => {
-  const toolsClient = new ToolsAPIClient();
+  const toolExecutionService = req.app.locals.toolExecutionService;
   
   try {
-    const tools = await toolsClient.getAvailableTools();
+    const tools = await toolExecutionService.getAvailableTools();
+    const stats = toolExecutionService.getExecutionStats();
     
     res.json({
+      tools: Object.fromEntries(tools),
+      categories: toolExecutionService.getCategories(),
+      statistics: stats,
       timestamp: new Date().toISOString(),
-      ...tools
     });
   } catch (error) {
     logger.error('Failed to get available tools:', error);
@@ -40,16 +43,17 @@ export const getAvailableTools = asyncHandler(async (req: Request, res: Response
  *         description: Tools service health status
  */
 export const getToolsHealth = asyncHandler(async (req: Request, res: Response) => {
-  const toolsClient = new ToolsAPIClient();
+  const toolExecutionService = req.app.locals.toolExecutionService;
   
-  const isHealthy = await toolsClient.healthCheck();
-  const config = toolsClient.getConfig();
+  const stats = toolExecutionService.getExecutionStats();
+  const isHealthy = stats.availableTools > 0;
   
   res.status(isHealthy ? 200 : 503).json({
     status: isHealthy ? 'healthy' : 'unhealthy',
     timestamp: new Date().toISOString(),
-    serviceUrl: config.baseURL,
-    timeout: config.timeout
+    availableTools: stats.availableTools,
+    totalTools: stats.totalTools,
+    activeExecutions: stats.activeExecutions
   });
 });
 
@@ -114,11 +118,10 @@ export const getToolCategories = asyncHandler(async (req: Request, res: Response
  */
 export const getToolInfo = asyncHandler(async (req: Request, res: Response) => {
   const { toolName } = req.params;
-  const toolsClient = new ToolsAPIClient();
+  const toolExecutionService = req.app.locals.toolExecutionService;
   
   try {
-    const allTools = await toolsClient.getAvailableTools();
-    const tool = allTools.tools[toolName];
+    const tool = toolExecutionService.getToolInfo(toolName);
     
     if (!tool) {
       throw new ApiError(`Tool '${toolName}' not found`, 404);

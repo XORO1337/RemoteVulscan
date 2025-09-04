@@ -6,6 +6,7 @@ import {
   getToolInfo,
   getScanModes
 } from '@/controllers/toolsController';
+import { asyncHandler } from '@/middleware/errorHandler';
 
 const router = Router();
 
@@ -23,5 +24,40 @@ router.get('/scan-modes', getScanModes);
 
 // GET /api/v1/tools/:toolName - Get specific tool info
 router.get('/:toolName', getToolInfo);
+
+// POST /api/v1/tools/execute - Execute a single tool
+router.post('/execute', asyncHandler(async (req: any, res: any) => {
+  const { tool, args = [], target, timeout } = req.body;
+  
+  if (!tool || !target) {
+    return res.status(400).json({
+      error: 'Tool and target are required',
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  const toolExecutionService = req.app.locals.toolExecutionService;
+  const result = await toolExecutionService.executeTool(tool, args, target, timeout);
+  
+  res.json(result);
+}));
+
+// POST /api/v1/tools/execute-multiple - Execute multiple tools
+router.post('/execute-multiple', asyncHandler(async (req: any, res: any) => {
+  const { tools, target, mode = 'parallel' } = req.body;
+  
+  if (!tools || !Array.isArray(tools) || !target) {
+    return res.status(400).json({
+      error: 'Tools array and target are required',
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  const toolExecutionService = req.app.locals.toolExecutionService;
+  const results = await toolExecutionService.executeMultipleTools(tools, target, mode);
+  const report = await toolExecutionService.generateScanReport(results);
+  
+  res.json(report);
+}));
 
 export default router;
