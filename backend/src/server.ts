@@ -116,7 +116,15 @@ class BackendServer {
           });
         }
 
-        const result = await this.toolExecutionService.executeTool(tool, args, target, timeout);
+        const toolExecutionService = req.app.locals.toolExecutionService;
+        if (!toolExecutionService) {
+          return res.status(503).json({
+            error: 'Tool execution service not available',
+            timestamp: new Date().toISOString()
+          });
+        }
+
+        const result = await toolExecutionService.executeTool(tool, args, target, timeout);
         res.json(result);
       } catch (error) {
         logger.error('Tool execution failed:', error);
@@ -140,8 +148,16 @@ class BackendServer {
           });
         }
 
-        const results = await this.toolExecutionService.executeMultipleTools(tools, target, mode);
-        const report = await this.toolExecutionService.generateScanReport(results);
+        const toolExecutionService = req.app.locals.toolExecutionService;
+        if (!toolExecutionService) {
+          return res.status(503).json({
+            error: 'Tool execution service not available',
+            timestamp: new Date().toISOString()
+          });
+        }
+
+        const results = await toolExecutionService.executeMultipleTools(tools, target, mode);
+        const report = await toolExecutionService.generateScanReport(results);
         res.json(report);
       } catch (error) {
         logger.error('Multiple tools execution failed:', error);
@@ -156,12 +172,20 @@ class BackendServer {
     // Tool information endpoint
     this.app.get('/api/v1/tools/info', async (req, res) => {
       try {
-        const tools = await this.toolExecutionService.getAvailableTools();
-        const stats = this.toolExecutionService.getExecutionStats();
+        const toolExecutionService = req.app.locals.toolExecutionService;
+        if (!toolExecutionService) {
+          return res.status(503).json({
+            error: 'Tool execution service not available',
+            timestamp: new Date().toISOString()
+          });
+        }
+
+        const tools = await toolExecutionService.getAvailableTools();
+        const stats = toolExecutionService.getExecutionStats();
         
         res.json({
           tools: Object.fromEntries(tools),
-          categories: this.toolExecutionService.getCategories(),
+          categories: toolExecutionService.getCategories(),
           statistics: stats,
           timestamp: new Date().toISOString()
         });

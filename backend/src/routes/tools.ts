@@ -32,11 +32,25 @@ router.post('/execute', asyncHandler(async (req: any, res: any) => {
   if (!tool || !target) {
     return res.status(400).json({
       error: 'Tool and target are required',
+      example: {
+        tool: 'nmap',
+        target: 'scanme.nmap.org',
+        args: ['-sn'],
+        timeout: 30000
+      },
       timestamp: new Date().toISOString()
     });
   }
 
   const toolExecutionService = req.app.locals.toolExecutionService;
+  if (!toolExecutionService) {
+    return res.status(503).json({
+      error: 'Tool execution service not initialized',
+      message: 'The backend is still starting up. Please try again in a few seconds.',
+      timestamp: new Date().toISOString()
+    });
+  }
+
   const result = await toolExecutionService.executeTool(tool, args, target, timeout);
   
   res.json(result);
@@ -49,11 +63,27 @@ router.post('/execute-multiple', asyncHandler(async (req: any, res: any) => {
   if (!tools || !Array.isArray(tools) || !target) {
     return res.status(400).json({
       error: 'Tools array and target are required',
+      example: {
+        tools: [
+          { name: 'nmap', args: ['-sn'] },
+          { name: 'nuclei', args: ['-version'] }
+        ],
+        target: 'scanme.nmap.org',
+        mode: 'parallel'
+      },
       timestamp: new Date().toISOString()
     });
   }
 
   const toolExecutionService = req.app.locals.toolExecutionService;
+  if (!toolExecutionService) {
+    return res.status(503).json({
+      error: 'Tool execution service not initialized',
+      message: 'The backend is still starting up. Please try again in a few seconds.',
+      timestamp: new Date().toISOString()
+    });
+  }
+
   const results = await toolExecutionService.executeMultipleTools(tools, target, mode);
   const report = await toolExecutionService.generateScanReport(results);
   
