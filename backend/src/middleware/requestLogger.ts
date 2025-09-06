@@ -7,12 +7,9 @@ export interface RequestWithId extends Request {
 }
 
 export const requestLogger = (req: RequestWithId, res: Response, next: NextFunction): void => {
-  // Add unique request ID
   req.id = uuidv4();
-  
   const startTime = Date.now();
   
-  // Log request start
   logger.info('Request started', {
     requestId: req.id,
     method: req.method,
@@ -22,7 +19,6 @@ export const requestLogger = (req: RequestWithId, res: Response, next: NextFunct
     timestamp: new Date().toISOString()
   });
 
-  // Override res.end to log response
   const originalEnd = res.end;
   res.end = function(chunk?: any, encoding?: any): Response {
     const duration = Date.now() - startTime;

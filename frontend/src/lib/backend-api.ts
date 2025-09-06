@@ -1,4 +1,4 @@
-// Central helper for backend API base URL (always includes /api/v1)
+// Central helper for backend API base URL
 export function getBackendApiBase() {
   const root = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') || 'http://localhost:8000';
   return `${root}/api/v1`;

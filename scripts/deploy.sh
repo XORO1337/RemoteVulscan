@@ -1,22 +1,20 @@
 #!/bin/bash
 
-# Complete Deployment Script for Vulnerability Scanner
-# This script builds and deploys the entire application using Docker Compose
+# RemoteVulscan Deployment Script
+# Containerized deployment with Docker Compose
 
 set -e
 
-echo "🚀 Deploying Vulnerability Scanner with Docker Compose"
-echo " Made with ❤️ by Hardik (@XORO1337) "
-echo "========================================================"
+echo "🚀 Deploying RemoteVulscan"
+echo "=========================="
 
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# Function to print colored output
 print_status() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
@@ -33,118 +31,115 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Check if Docker is running
+# Check Docker
 if ! docker info >/dev/null 2>&1; then
     print_error "Docker is not running. Please start Docker service."
     exit 1
 fi
 
-# Check if docker-compose is available
+# Check Docker Compose
 if ! command -v docker-compose >/dev/null 2>&1; then
-    print_error "Docker Compose is not installed. Please run setup-docker.sh first."
+    print_error "Docker Compose is not installed."
     exit 1
 fi
 
-# Create necessary directories
-print_status "Creating necessary directories..."
-mkdir -p data/db
-mkdir -p logs
-mkdir -p reports
-mkdir -p tools
+# Setup environment
+if [ ! -f ".env" ]; then
+    print_status "Creating environment file..."
+    cp .env.example .env
+    print_success "Environment file created"
+else
+    print_status "Environment file already exists"
+fi
 
-# Set permissions
-chmod -R 755 data logs reports tools
-
-# Stop existing containers if any
+# Stop existing containers
 print_status "Stopping existing containers..."
 docker-compose down --remove-orphans 2>/dev/null || true
 
-# Build Docker images
-print_status "Building Docker images..."
-print_status "Building tools image (this may take a while)..."
-docker-compose build tools
+# Clean up old images (optional)
+print_status "Cleaning up old Docker images..."
+docker system prune -f || true
 
-print_status "Building application image..."
-docker-compose build app
+# Build and start services
+print_status "Building and starting services..."
+docker-compose up -d --build --force-recreate
 
-# Start services
-print_status "Starting services..."
-docker-compose up -d
+# Wait for services
+print_status "Waiting for backend to be ready..."
+timeout=60
+counter=0
+while [ $counter -lt $timeout ]; do
+    if curl -f http://localhost:8000/api/v1/health >/dev/null 2>&1; then
+        break
+    fi
+    sleep 2
+    counter=$((counter + 2))
+done
 
-# Wait for services to be ready
-print_status "Waiting for services to be ready..."
-sleep 30
+print_status "Waiting for frontend to be ready..."
+counter=0
+while [ $counter -lt $timeout ]; do
+    if curl -f http://localhost:3000/api/health >/dev/null 2>&1; then
+        break
+    fi
+    sleep 2
+    counter=$((counter + 2))
+done
 
 # Check service status
 print_status "Checking service status..."
-docker-compose ps
-
-# Verify services are running
-print_status "Verifying services are running..."
-if docker-compose ps | grep -q "Up"; then
+if docker-compose ps --services --filter "status=running" | grep -q "backend\|frontend"; then
     print_success "Services are running successfully!"
 else
-    print_warning "Some services may not be running properly. Check logs with: docker-compose logs"
+    print_warning "Some services may not be ready yet. Check logs with: docker-compose logs"
 fi
 
-# Run tools verification
-print_status "Verifying security tools installation..."
-docker-compose exec tools /tools/verify-tools.sh
+# Test API
+print_status "Testing API endpoints..."
+if curl -f http://localhost:8000/api/v1/health >/dev/null 2>&1; then
+    print_success "Backend API is responding"
+else
+    print_warning "Backend API may not be ready yet"
+fi
 
-# Print access information
-print_success "Deployment completed successfully!"
+if curl -f http://localhost:3000 >/dev/null 2>&1; then
+    print_success "Frontend is responding"
+else
+    print_warning "Frontend may not be ready yet"
+fi
+
+# Verify tools in backend container
+print_status "Verifying security tools..."
+if docker exec remotevulscan-backend verify-tools.sh >/dev/null 2>&1; then
+    print_success "Security tools are available"
+else
+    print_warning "Some security tools may not be available"
+fi
+
+print_success "Deployment completed!"
 echo ""
-echo "🎉 Vulnerability Scanner has been deployed successfully!"
+echo "🎉 RemoteVulscan is now running!"
 echo ""
 echo "📋 Access Information:"
-echo "   • Application URL: http://localhost:3000"
-echo "   • API Health Check: http://localhost:3000/api/health"
-echo "   • Tools Container: docker-compose exec tools bash"
+echo "   • Frontend: http://localhost:3000"
+echo "   • Backend API: http://localhost:8000"
+echo "   • Health Check: http://localhost:8000/api/v1/health"
+echo "   • API Documentation: http://localhost:8000/api/v1/docs"
 echo ""
 echo "🔧 Management Commands:"
 echo "   • View logs: docker-compose logs -f"
+echo "   • View backend logs: docker-compose logs -f backend"
+echo "   • View frontend logs: docker-compose logs -f frontend"
 echo "   • Stop services: docker-compose down"
-echo "   • Restart services: docker-compose restart"
-echo "   • View status: docker-compose ps"
-echo "   • Access tools: docker-compose exec tools bash"
+echo "   • Restart: docker-compose restart"
+echo "   • Rebuild: docker-compose up -d --build"
 echo ""
-echo "📁 Data Directories:"
-echo "   • Database: ./data/db/"
-echo "   • Logs: ./logs/"
-echo "   • Reports: ./reports/"
-echo "   • Tools: ./tools/"
+echo "🛡️ Available Tools:"
+echo "   • Network: nmap, masscan"
+echo "   • Web: nikto, nuclei, sqlmap, gobuster"
+echo "   • SSL: testssl.sh, sslscan"
+echo "   • Discovery: httpx, subfinder"
 echo ""
-echo "🛡️  Security Tools Available:"
-echo "   • Nmap - Network scanning"
-echo "   • Nikto - Web server scanning"
-echo "   • SQLMap - SQL injection detection"
-echo "   • Commix - Command injection detection"
-echo "   • Corsy - CORS misconfiguration detection"
-echo "   • Nettacker - Network penetration testing"
-echo "   • Nuclei - Vulnerability scanning"
-echo "   • And many more..."
+echo "🐳 Container Status:"
+docker-compose ps
 echo ""
-echo "📊 Monitoring:"
-echo "   • Application logs: docker-compose logs -f app"
-echo "   • Tools logs: docker-compose logs -f tools"
-echo "   • Database logs: docker-compose logs -f db"
-echo ""
-echo "🔄 Maintenance:"
-echo "   • Update tools: docker-compose build --no-cache tools"
-echo "   • Update app: docker-compose build --no-cache app"
-echo "   • Clean up: docker system prune"
-echo ""
-echo "⚠️  First Run Notes:"
-echo "   • The application may take a few minutes to fully start"
-echo "   • Security tools are being installed in the background"
-echo "   • You can monitor the installation progress with: docker-compose logs -f tools"
-echo "   • Once tools are installed, you can start scanning immediately"
-echo ""
-echo "🎯 Next Steps:"
-echo "   1. Open http://localhost:3000 in your browser"
-echo "   2. Enter a URL to scan"
-echo "   3. Select scan type and start scanning"
-echo "   4. View live results in the Live Results tab"
-echo "   5. Download HTML reports when scans complete"
-echo ""
-echo "Enjoy you Journey ❤️ "

@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -10,6 +11,14 @@ const nextConfig = {
     unoptimized: true,
   },
   reactStrictMode: false,
+  async rewrites() {
+    return [
+      {
+        source: '/api/health',
+        destination: '/api/health',
+      },
+    ];
+  },
   webpack: (config, { dev }) => {
     if (dev) {
       // Disable webpack hot module replacement for nodemon compatibility

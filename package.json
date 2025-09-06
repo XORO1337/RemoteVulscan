@@ -1,0 +1,29 @@
+{
+  "name": "remotevulscan",
+  "version": "1.0.0",
+  "description": "Comprehensive vulnerability scanning platform with integrated security tools",
+  "private": true,
+  "scripts": {
+    "dev": "docker-compose up -d --build",
+    "build": "docker-compose build",
+    "start": "docker-compose up -d",
+    "stop": "docker-compose down",
+    "logs": "docker-compose logs -f",
+    "test": "./scripts/test-setup.sh",
+    "deploy": "./scripts/deploy.sh",
+    "clean": "docker-compose down -v --rmi local --remove-orphans"
+  },
+  "keywords": [
+    "vulnerability-scanner",
+    "security",
+    "penetration-testing",
+    "docker",
+    "cybersecurity"
+  ],
+  "author": "RemoteVulscan Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "docker": ">=20.0.0"
+  }
+}

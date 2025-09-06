@@ -1,6 +1,6 @@
 # RemoteVulscan Backend API
 
-The backend API service for RemoteVulscan, providing a comprehensive RESTful API for security vulnerability scanning with asynchronous processing capabilities.
+The backend API service for RemoteVulscan, providing a comprehensive RESTful API for security vulnerability scanning with integrated tool execution capabilities.
 
 ## 🏗️ Architecture
 
@@ -8,11 +8,12 @@ Built with modern Node.js technologies:
 - **Express.js** - Web framework
 - **TypeScript** - Type safety and developer experience
 - **Prisma** - Database ORM with SQLite
-- **BullMQ** - Job queuing with Redis
+- **BullMQ** - Job queuing with Redis (optional)
 - **Socket.IO** - Real-time WebSocket communication
 - **Winston** - Structured logging
 - **Joi** - Request validation
 - **Swagger/OpenAPI** - API documentation
+- **Integrated Tool Execution** - Security tools run within the same container
 
 ## 📡 API Endpoints
 
@@ -38,6 +39,8 @@ Built with modern Node.js technologies:
 
 ### Tools Information
 - `GET /api/v1/tools` - List available security tools
+- `POST /api/v1/tools/execute` - Execute a single security tool
+- `POST /api/v1/tools/execute-multiple` - Execute multiple tools
 - `GET /api/v1/tools/{name}` - Get specific tool information
 - `GET /api/v1/tools/categories` - Tool categories
 - `GET /api/v1/tools/scan-modes` - Available scan modes
@@ -88,6 +91,9 @@ npx prisma generate
 # Initialize database
 npx prisma db push
 
+# Verify security tools (if running in container)
+npm run tools:verify
+
 # Start development server
 npm run dev
 ```
@@ -105,14 +111,13 @@ npm start
 
 ```bash
 # Build container
-docker build -t remotevulscan-backend .
+docker build -t remotevulscan-backend -f backend/Dockerfile .
 
 # Run with environment variables
 docker run -d \
   -p 8000:8000 \
   -e DATABASE_URL=file:./data/db/custom.db \
-  -e REDIS_HOST=redis \
-  -e TOOLS_API_URL=http://tools:3001 \
+  -e TOOLS_PATH=/usr/local/bin \
   -v $(pwd)/data:/app/data \
   remotevulscan-backend
 ```
@@ -123,14 +128,13 @@ docker run -d \
 
 **Required:**
 - `DATABASE_URL` - SQLite database path
-- `REDIS_HOST` - Redis hostname
-- `TOOLS_API_URL` - Security tools API URL
+- `TOOLS_PATH` - Path to security tools (default: /usr/local/bin)
 
 **Optional:**
 - `PORT` - Server port (default: 8000)
 - `NODE_ENV` - Environment (development/production)
 - `LOG_LEVEL` - Logging level (debug/info/warn/error)
-- `SCAN_CONCURRENCY` - Max concurrent scans (default: 3)
+- `MAX_CONCURRENT_EXECUTIONS` - Max concurrent tool executions (default: 5)
 - `JWT_SECRET` - JWT signing secret
 - `FRONTEND_URL` - Frontend URL for CORS
 
@@ -155,7 +159,7 @@ npx prisma studio
 
 ### Redis Configuration
 
-Required for job queuing:
+Optional for job queuing (falls back to direct execution):
 ```bash
 # Default connection
 redis://localhost:6379
@@ -168,6 +172,16 @@ REDIS_HOST=localhost
 REDIS_PORT=6379
 REDIS_PASSWORD=your-password
 ```
+
+### Security Tools
+
+The backend now includes integrated security tools:
+- **Network**: nmap, masscan
+- **Web**: nikto, nuclei, gobuster, dirsearch, whatweb, sqlmap
+- **Crypto**: testssl.sh, sslscan
+- **Discovery**: httpx, subfinder, assetfinder
+
+Tools are verified on startup and available via the tool execution service.
 
 ## 🔍 Security Features
 
@@ -205,16 +219,17 @@ class ScanOrchestrator {
   async getQueueStats(): Promise<QueueStats>
 }
 
+// Tool execution service (NEW)
+class ToolExecutionService {
+  async executeTool(tool: string, args: string[], target: string): Promise<ToolExecutionResult>
+  async executeMultipleTools(tools: any[], target: string, mode: string): Promise<ToolExecutionResult[]>
+  async getAvailableTools(): Promise<Map<string, ToolInfo>>
+}
+
 // WebSocket communication
 class WebSocketService {
   emitScanUpdate(scanId: string, data: ScanUpdateData): void
   emitQueueUpdate(queueStats: any): void
-}
-
-// Tools API client
-class ToolsAPIClient {
-  async executeTool(request: ToolExecuteRequest): Promise<ToolExecuteResponse>
-  async executeScan(request: ScanRequest): Promise<ScanResponse>
 }
 ```
 
@@ -266,10 +281,21 @@ npm run test:coverage
 # Integration tests
 npm run test:integration
 
+# Test tool execution
+npm run tools:test
+
+# Verify tools installation
+npm run tools:verify
+
 # API testing with curl
 curl -X POST http://localhost:8000/api/v1/scans \
   -H "Content-Type: application/json" \
   -d '{"url":"https://example.com","scanType":"NUCLEI"}'
+
+# Test tool execution
+curl -X POST http://localhost:8000/api/v1/tools/execute \
+  -H "Content-Type: application/json" \
+  -d '{"tool":"nmap","target":"scanme.nmap.org","args":["-sn"]}'
 ```
 
 ## 📊 Monitoring
@@ -281,6 +307,12 @@ curl http://localhost:8000/api/v1/health
 
 # Detailed system info
 curl http://localhost:8000/api/v1/system/info
+
+# Tools health
+curl http://localhost:8000/api/v1/tools/health
+
+# Available tools
+curl http://localhost:8000/api/v1/tools
 
 # Performance metrics
 curl http://localhost:8000/api/v1/system/metrics
@@ -383,11 +415,13 @@ docker logs redis-container
 
 **Tools API Connection:**
 ```bash
-# Test tools API
-curl http://localhost:3001/health
+# Test tool execution
+curl -X POST http://localhost:8000/api/v1/tools/execute \
+  -H "Content-Type: application/json" \
+  -d '{"tool":"nmap","target":"127.0.0.1","args":["-sn"]}'
 
-# Check available tools
-curl http://localhost:3001/api/tools
+# Verify tools
+docker exec <container> verify-tools.sh
 ```
 
 **Queue Issues:**
@@ -423,5 +457,16 @@ MIT License - see LICENSE file for details
 5. Create Pull Request
 
 ---
+
+## 🔧 Recent Changes
+
+### v2.0 - Integrated Tool Execution
+- **Removed external tools container dependency**
+- **Integrated security tools directly into backend container**
+- **Added ToolExecutionService for direct tool execution**
+- **Enhanced error handling and logging**
+- **Improved Docker image with all tools pre-installed**
+- **Added tool verification and health checking**
+- **Simplified deployment architecture**
 
 For more information, see the main [ARCHITECTURE.md](../ARCHITECTURE.md) documentation.
