@@ -15,10 +15,12 @@ services:
       - TOOLS_PATH=/usr/local/bin
       - MAX_CONCURRENT_EXECUTIONS=5
       - PORT=8000
+      - FRONTEND_URL=http://frontend:3000
+      - CORS_ORIGIN=http://localhost:3000,http://frontend:3000
     volumes:
-      - ./data:/app/data
-      - ./logs:/app/logs
-      - ./reports:/app/reports
+      - backend_data:/app/data
+      - backend_logs:/app/logs
+      - backend_reports:/app/reports
     networks:
       - app-network
     restart: unless-stopped
@@ -41,37 +43,27 @@ services:
       - NODE_ENV=production
       - NEXT_TELEMETRY_DISABLED=1
       - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_WS_URL=ws://localhost:8000
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     networks:
       - app-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
 
-  # Database initialization
-  db:
-    image: alpine:latest
-    container_name: remotevulscan-db
-    volumes:
-      - ./data/db:/data/db
-      - ./scripts/init-db.sh:/init-db.sh:ro
-    environment:
-      - SQLITE_DB_PATH=/data/db/custom.db
-    networks:
-      - app-network
-    restart: "no"
-    command: >
-      sh -c "
-        apk add --no-cache sqlite &&
-        chmod +x /init-db.sh &&
-        /init-db.sh &&
-        echo 'Database initialization completed'
-      "
+volumes:
+  backend_data:
+    driver: local
+  backend_logs:
+    driver: local
+  backend_reports:
+    driver: local
 
 networks:
   app-network:

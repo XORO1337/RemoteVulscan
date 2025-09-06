@@ -5,7 +5,7 @@ A comprehensive, self-contained vulnerability scanning platform with integrated 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Docker & Docker Compose
+- Docker (20.0+) & Docker Compose (2.0+)
 - 4GB+ RAM recommended
 - 10GB+ storage space
 
@@ -23,7 +23,7 @@ cp .env.example .env
 ./scripts/deploy.sh
 
 # Or manually with Docker Compose
-docker compose up -d --build
+docker-compose up -d --build
 
 # Verify deployment
 ./scripts/test-setup.sh
@@ -40,16 +40,21 @@ docker compose up -d --build
 ## 🏗️ Architecture
 
 ```
-┌─────────────────┐    ┌─────────────────────────────────────┐
-│   Frontend      │    │   Backend + Security Tools          │
-│   (Next.js)     │◄──►│   (Node.js + Integrated Tools)     │
-│   Port 3000     │    │   Port 8000                         │
-│                 │    │                                     │
-│   - Web UI      │    │   - REST API                        │
-│   - Scan Forms  │    │   - Tool Execution                  │
-│   - Results     │    │   - SQLite Database                 │
-│                 │    │   - 15+ Security Tools              │
-└─────────────────┘    └─────────────────────────────────────┘
+┌─────────────────────┐    ┌─────────────────────────────────────┐
+│   Frontend          │    │   Backend + Security Tools          │
+│   Container         │◄──►│   Container                         │
+│   (Next.js)         │    │   (Node.js + Integrated Tools)     │
+│   Port 3000         │    │   Port 8000                         │
+│                     │    │                                     │
+│   - Web UI          │    │   - REST API                        │
+│   - Scan Forms      │    │   - Tool Execution                  │
+│   - Results Display │    │   - SQLite Database                 │
+│   - Real-time UI    │    │   - 15+ Security Tools              │
+│                     │    │   - WebSocket Support               │
+└─────────────────────┘    └─────────────────────────────────────┘
+           │                                    │
+           └────────── Docker Network ─────────┘
+                    (app-network)
 ```
 
 ## 🛠️ Integrated Security Tools
@@ -217,30 +222,61 @@ docker compose logs -f backend | grep ERROR
 
 ## 📦 Deployment Options
 
-### Local Development
+### Local Development & Production
 ```bash
+# Quick deployment (recommended)
 ./scripts/deploy.sh
-```
 
-### Production Deployment
-```bash
-# Set production environment
-export NODE_ENV=production
+# Manual deployment
+docker-compose up -d --build
 
-# Deploy with production settings
-docker compose up -d --build
-
-# Enable log rotation
-docker compose logs --tail=1000 -f > /var/log/remotevulscan.log &
+# Verify deployment
+./scripts/test-setup.sh
 ```
 
 ### Cloud Deployment
-The application is containerized and can be deployed on:
+The containerized application can be deployed on:
 - **Docker Swarm**
 - **Kubernetes**
 - **AWS ECS/Fargate**
 - **Google Cloud Run**
 - **Azure Container Instances**
+- **DigitalOcean App Platform**
+
+### Container Management
+```bash
+# View container status
+docker-compose ps
+
+# View logs
+docker-compose logs -f
+docker-compose logs -f backend
+docker-compose logs -f frontend
+
+# Restart services
+docker-compose restart
+
+# Stop services
+docker-compose down
+
+# Rebuild and restart
+docker-compose up -d --build --force-recreate
+
+# Clean up everything
+docker-compose down -v --remove-orphans
+```
+
+### Environment Configuration
+```bash
+# Copy and edit environment file
+cp .env.example .env
+
+# Key environment variables:
+# - CORS_ORIGIN: Frontend URLs for CORS
+# - MAX_CONCURRENT_EXECUTIONS: Tool execution limit
+# - DATABASE_URL: SQLite database path
+# - NEXT_PUBLIC_API_URL: Backend API URL for frontend
+```
 
 ## 📄 License
 
@@ -248,4 +284,4 @@ MIT License - see LICENSE file for details
 
 ---
 
-**RemoteVulscan - Simplified, Secure, Self-contained Vulnerability Scanner**
+**RemoteVulscan - Containerized, Secure, Self-contained Vulnerability Scanner**
