@@ -10,13 +10,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@radix-ui/react-alert": "latest",
-    "@radix-ui/react-badge": "latest",
-    "@radix-ui/react-button": "latest",
-    "@radix-ui/react-card": "latest",
     "@radix-ui/react-dialog": "latest",
-    "@radix-ui/react-form": "latest",
-    "@radix-ui/react-input": "latest",
     "@radix-ui/react-label": "latest",
     "@radix-ui/react-progress": "latest",
     "@radix-ui/react-select": "latest",
@@ -29,12 +23,14 @@
     "next": "14.2.16",
     "react": "^18",
     "react-dom": "^18",
+    "react-hook-form": "^7.62.0",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.9",
     "@types/node": "^22",
+    "@types/prop-types": "^15.7.15",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "postcss": "^8.5",
