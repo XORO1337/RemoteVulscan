@@ -18,6 +18,7 @@ import {
   Activity,
   Target
 } from 'lucide-react'
+import { apiClient } from '@/lib/api'
 
 interface ScanResult {
   id: string
@@ -39,8 +40,7 @@ export default function HomePage() {
 
   const checkSystemStatus = async () => {
     try {
-      const response = await fetch('/api/v1/health')
-      const data = await response.json()
+      const data = await apiClient.healthCheck()
       setSystemStatus(data)
     } catch (error) {
       console.error('Failed to check system status:', error)
@@ -60,21 +60,11 @@ export default function HomePage() {
     })
 
     try {
-      // Create scan
-      const response = await fetch('/api/v1/scans', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          url,
-          scanType: 'NUCLEI'
-        })
+      // Create scan using API client
+      const scan = await apiClient.createScan({
+        url,
+        scanType: 'NUCLEI'
       })
-
-      if (!response.ok) {
-        throw new Error('Failed to create scan')
-      }
-
-      const scan = await response.json()
       
       // Simulate scan progress
       simulateScanProgress(scan.id)
