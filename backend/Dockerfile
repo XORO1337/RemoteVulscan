@@ -164,7 +164,7 @@ FROM base AS deps
 WORKDIR /app
 
 # Copy package files
-COPY backend/package*.json backend/package-lock.json ./
+COPY backend/package.json backend/package-lock.json ./
 
 # Install Node.js dependencies
 RUN npm ci --omit=dev && \

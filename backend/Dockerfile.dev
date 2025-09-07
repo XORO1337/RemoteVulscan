@@ -1,0 +1,85 @@
+# syntax=docker/dockerfile:1
+
+# Development Dockerfile for RemoteVulscan Backend
+# This Dockerfile is optimized for instant startup with live reloading
+
+FROM node:20-alpine AS development
+
+# Install system dependencies and essential security tools
+RUN apk add --no-cache \
+    # Basic system tools
+    bash \
+    curl \
+    wget \
+    git \
+    ca-certificates \
+    openssl \
+    sqlite \
+    # Build dependencies for native modules
+    build-base \
+    linux-headers \
+    python3 \
+    python3-dev \
+    py3-pip \
+    # Essential network tools for development
+    nmap \
+    nmap-scripts \
+    # SSL/TLS tools
+    openssl \
+    # Additional utilities
+    bind-tools \
+    netcat-openbsd \
+    # Text processing tools
+    jq \
+    # Archive tools
+    unzip \
+    tar \
+    gzip
+
+# Set environment variables
+ENV NODE_ENV=development
+ENV TOOLS_PATH=/usr/local/bin
+ENV PATH="/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin:${PATH}"
+
+# Create app directory
+WORKDIR /app
+
+# Install Node.js dependencies first (this layer will be cached)
+COPY backend/package.json backend/package-lock.json ./
+RUN npm ci
+
+# Install essential Python security tools for development
+RUN pip3 install --no-cache-dir --break-system-packages \
+    requests \
+    beautifulsoup4 \
+    lxml \
+    pyyaml \
+    cryptography \
+    httpx \
+    sqlmap
+
+# Create necessary directories
+RUN mkdir -p /app/data /app/logs /app/reports /tmp/scans
+
+# Set permissions
+RUN chown -R node:node /app /tmp/scans && \
+    chmod -R 755 /app /tmp/scans
+
+# Switch to non-root user
+USER node
+
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+    CMD curl -f http://localhost:8000/api/v1/health || exit 1
+
+# Environment variables for development
+ENV DATABASE_URL="file:./data/db/custom.db"
+ENV PORT=8000
+ENV MAX_CONCURRENT_EXECUTIONS=5
+
+# Start development server with hot reloading
+# Source code will be mounted as volume for instant updates
+CMD ["npm", "run", "dev"]
