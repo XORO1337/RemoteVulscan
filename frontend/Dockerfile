@@ -13,10 +13,10 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Copy package files
-COPY frontend/package.json frontend/package-lock.json ./
+COPY package.json package-lock.json ./
 
-# Install dependencies
-RUN npm ci --omit=dev && npm cache clean --force
+# Install dependencies (include dev dependencies for build tooling like Tailwind/PostCSS)
+RUN npm ci && npm cache clean --force
 
 # -----------------------
 # Builder stage
@@ -48,6 +48,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Create nextjs user
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
+
+# Install curl for container healthcheck
+RUN apk add --no-cache curl
 
 # Copy built application
 COPY --from=builder /app/public ./public

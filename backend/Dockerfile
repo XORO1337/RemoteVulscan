@@ -26,7 +26,6 @@ RUN apk add --no-cache \
     py3-pip \
     # Network tools
     nmap \
-    nmap-scripts \
     masscan \
     # SSL/TLS tools
     openssl \
@@ -123,37 +122,6 @@ RUN nuclei -update-templates -silent || true
 
 # Create tools verification script
 RUN cat > /usr/local/bin/verify-tools.sh << 'EOF'
-#!/bin/bash
-echo "🛡️  Verifying Security Tools Installation"
-echo "=========================================="
-
-tools=("nmap" "nikto" "nuclei" "testssl.sh" "sslscan" "sqlmap" "gobuster" "ffuf" "whatweb" "masscan" "httpx" "subfinder" "dirsearch")
-
-available=0
-total=${#tools[@]}
-
-for tool in "${tools[@]}"; do
-    if command -v "$tool" >/dev/null 2>&1; then
-        version=$($tool --version 2>&1 | head -n 1 | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -n 1 || echo "unknown")
-        echo "✓ $tool is available (version: $version)"
-        ((available++))
-    else
-        echo "✗ $tool is not available"
-    fi
-done
-
-echo ""
-echo "Summary: $available/$total tools available"
-
-if [ $available -eq $total ]; then
-    echo "🎉 All security tools are properly installed!"
-    exit 0
-else
-    echo "⚠️  Some tools are missing. Check installation."
-    exit 1
-fi
-EOF
-
 RUN chmod +x /usr/local/bin/verify-tools.sh
 
 # -----------------------
@@ -164,10 +132,10 @@ FROM base AS deps
 WORKDIR /app
 
 # Copy package files
-COPY backend/package.json backend/package-lock.json ./
+COPY package.json package-lock.json ./
 
-# Install Node.js dependencies
-RUN npm ci --omit=dev && \
+# Install Node.js dependencies (include dev for prisma during build)
+RUN npm ci && \
     npm cache clean --force
 
 # -----------------------
@@ -199,6 +167,8 @@ COPY --from=tools-installer /usr/local/bin/ /usr/local/bin/
 COPY --from=tools-installer /opt/ /opt/
 COPY --from=tools-installer /go/bin/ /usr/local/bin/
 COPY --from=tools-installer /usr/lib/python3.11/site-packages/ /usr/lib/python3.11/site-packages/
+# Ensure Python CLI tools installed via pip are available
+COPY --from=tools-installer /usr/bin/sqlmap /usr/bin/sqlmap
 
 # Create application user
 RUN addgroup -g 1001 -S nodejs && \
