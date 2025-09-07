@@ -164,10 +164,10 @@ FROM base AS deps
 WORKDIR /app
 
 # Copy package files
-COPY backend/package*.json ./
+COPY backend/package*.json backend/package-lock.json ./
 
 # Install Node.js dependencies
-RUN npm ci --only=production && \
+RUN npm ci --omit=dev && \
     npm cache clean --force
 
 # -----------------------
@@ -198,7 +198,7 @@ FROM base AS runtime
 COPY --from=tools-installer /usr/local/bin/ /usr/local/bin/
 COPY --from=tools-installer /opt/ /opt/
 COPY --from=tools-installer /go/bin/ /usr/local/bin/
-COPY --from=tools-installer /usr/lib/python3.*/site-packages/ /usr/lib/python3.11/site-packages/
+COPY --from=tools-installer /usr/lib/python3.11/site-packages/ /usr/lib/python3.11/site-packages/
 
 # Create application user
 RUN addgroup -g 1001 -S nodejs && \
@@ -206,7 +206,7 @@ RUN addgroup -g 1001 -S nodejs && \
     # Create necessary directories
     mkdir -p /app/data /app/logs /app/reports /tmp/scans && \
     # Set permissions
-    chown -R backend:nodejs /app /tmp/scans /tools && \
+    chown -R backend:nodejs /app /tmp/scans && \
     chmod -R 755 /app /tmp/scans
 
 WORKDIR /app
