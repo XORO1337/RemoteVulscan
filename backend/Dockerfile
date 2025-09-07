@@ -33,13 +33,11 @@ RUN apk add --no-cache \
     bind-tools \
     netcat-openbsd \
     tcpdump \
-    # Perl for some security tools
+    # Dev tools
     perl \
     perl-dev \
-    # Ruby for some tools
     ruby \
     ruby-dev \
-    # Go for building tools
     go \
     # Text processing tools
     jq \
